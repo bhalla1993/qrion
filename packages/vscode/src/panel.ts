@@ -81,6 +81,7 @@ export class QraPanelProvider implements WebviewViewProvider {
       body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         padding: 12px;
+        line-height: 1.5;
       }
       h1 {
         font-size: 1.1rem;
@@ -93,6 +94,24 @@ export class QraPanelProvider implements WebviewViewProvider {
       }
       p {
         margin: 0.25rem 0;
+      }
+      .section-card {
+        margin-top: 0.75rem;
+        padding: 0.85rem;
+        border-radius: 12px;
+        border: 1px solid var(--vscode-editorWidget-border);
+        background: var(--vscode-editorWidget-background);
+      }
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 0.75rem;
+        margin-bottom: 0.6rem;
+      }
+      .section-copy {
+        color: var(--vscode-descriptionForeground);
+        font-size: 0.9rem;
       }
       code {
         font-family: var(--vscode-editor-font-family);
@@ -113,6 +132,28 @@ export class QraPanelProvider implements WebviewViewProvider {
       .tag-low { background: #1e8e3e33; color: #1e8e3e; }
       .tag-medium { background: #f9ab0033; color: #b76e00; }
       .tag-high { background: #d9302533; color: #a50e0e; }
+      .next-action {
+        font-weight: 600;
+      }
+      .copy-button {
+        border: 1px solid var(--vscode-button-border, transparent);
+        background: var(--vscode-button-background);
+        color: var(--vscode-button-foreground);
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .copy-button:hover {
+        background: var(--vscode-button-hoverBackground);
+      }
+      .copy-button:active {
+        transform: translateY(1px);
+      }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
     `;
 
     if (!this.report) {
@@ -205,6 +246,20 @@ export class QraPanelProvider implements WebviewViewProvider {
       "<h1>Qrion</h1>",
       `<p>${escapeHtml(r.summary)}</p>`,
 
+      "<h2>Next action</h2>",
+      `<div class="section-card"><p class="next-action">${escapeHtml(
+        r.nextAction
+      )}</p></div>`,
+
+      "<h2>Refined prompt</h2>",
+      "<div class=\"section-card\">",
+      "<div class=\"section-head\">",
+      "<p class=\"section-copy\">Copy this version into your agent when you are ready to move forward.</p>",
+      "<button type=\"button\" class=\"copy-button\" id=\"copySuggestedPrompt\">Copy prompt</button>",
+      "</div>",
+      `<pre><code id="refinedPrompt">${escapeHtml(r.refinedPrompt)}</code></pre>`,
+      "</div>",
+
       "<h2>Risk & context</h2>",
       `<p>Risk: <span class="${riskTagClass}">${escapeHtml(
         r.risk.level.toUpperCase()
@@ -240,6 +295,25 @@ export class QraPanelProvider implements WebviewViewProvider {
       r.confidence.reasons.length
         ? `<p>${escapeHtml(r.confidence.reasons.join(" | "))}</p>`
         : "",
+
+      "<script>",
+      "(() => {",
+      "  const button = document.getElementById('copySuggestedPrompt');",
+      "  const promptNode = document.getElementById('refinedPrompt');",
+      "  if (!button || !promptNode) { return; }",
+      "  const originalLabel = button.textContent || 'Copy prompt';",
+      "  button.addEventListener('click', async () => {",
+      "    try {",
+      "      await navigator.clipboard.writeText(promptNode.textContent || '');",
+      "      button.textContent = 'Copied';",
+      "    } catch (error) {",
+      "      button.textContent = 'Copy failed';",
+      "    } finally {",
+      "      window.setTimeout(() => { button.textContent = originalLabel; }, 1400);",
+      "    }",
+      "  });",
+      "})();",
+      "</script>",
 
       "</body>",
       "</html>"

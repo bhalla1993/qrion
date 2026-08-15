@@ -102,6 +102,13 @@ function formatReasons(reasons: string[]): string {
   return reasons.length > 0 ? reasons.slice(0, 3).join(" | ") : "None";
 }
 
+function indentBlock(text: string, indent = "  "): string {
+  return text
+    .split(/\r?\n/)
+    .map((line) => `${indent}${line}`)
+    .join("\n");
+}
+
 function printHumanReadable(report: AnalyzeReport): void {
   // eslint-disable-next-line no-console
   console.log("");
@@ -114,6 +121,17 @@ function printHumanReadable(report: AnalyzeReport): void {
 
   // eslint-disable-next-line no-console
   console.log(`Summary: ${report.summary}`);
+  // eslint-disable-next-line no-console
+  console.log("");
+
+  // eslint-disable-next-line no-console
+  console.log(`Next action: ${report.nextAction}`);
+  // eslint-disable-next-line no-console
+  console.log("");
+  // eslint-disable-next-line no-console
+  console.log("Refined prompt:");
+  // eslint-disable-next-line no-console
+  console.log(indentBlock(report.refinedPrompt));
   // eslint-disable-next-line no-console
   console.log("");
 

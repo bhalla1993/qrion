@@ -48,6 +48,10 @@ test("query stacking repo-wide, vague, multi-step, multi-module, and sensitive s
     "high",
     `expected worst-case query to score HIGH risk, got ${report.risk.level} (${report.risk.overall})`
   );
+  assert.match(report.nextAction, /rewrite before sending/i);
+  assert.match(report.refinedPrompt, /Please help with the following task\./);
+  assert.match(report.refinedPrompt, /Guidance:/);
+  assert.match(report.refinedPrompt, /Return:/);
 });
 
 test("short, narrow, unambiguous query stays LOW risk", () => {
@@ -60,6 +64,8 @@ test("short, narrow, unambiguous query stays LOW risk", () => {
   });
 
   assert.strictEqual(report.risk.level, "low");
+  assert.match(report.nextAction, /send as-is/i);
+  assert.match(report.refinedPrompt, /Keep the change focused/);
 });
 
 test("short, specific query has bounded token estimate", () => {

@@ -177,6 +177,14 @@ export interface AnalyzeReport {
    */
   model: ModelAdvice;
   /**
+   * Single best next step for the developer to take.
+   */
+  nextAction: string;
+  /**
+   * Deterministic prompt rewrite that can be copied and used directly.
+   */
+  refinedPrompt: string;
+  /**
    * Deterministic rewrite suggestions.
    */
   rewrites: RewriteSuggestion[];

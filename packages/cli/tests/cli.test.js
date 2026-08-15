@@ -41,4 +41,15 @@ test("analyze --json returns a parseable report", () => {
   assert.ok(typeof report.summary === "string" && report.summary.length > 0);
   assert.ok(["low", "medium", "high"].includes(report.risk.level));
   assert.ok(typeof report.model?.tier === "string");
+  assert.ok(typeof report.nextAction === "string" && report.nextAction.length > 0);
+  assert.ok(typeof report.refinedPrompt === "string" && report.refinedPrompt.length > 0);
+  assert.match(report.refinedPrompt, /Please help with the following task\./);
+});
+
+test("analyze human-readable output highlights the action and prompt", () => {
+  const output = runCli(["analyze", "Refactor the auth and billing flows across the repo."]);
+
+  assert.match(output, /Next action:/);
+  assert.match(output, /Refined prompt:/);
+  assert.match(output, /Task:/);
 });

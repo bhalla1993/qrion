@@ -11,6 +11,7 @@ import type {
 } from "./types";
 import type { QueryFeatureSummary } from "./queryFeatures";
 import { defaultConfig } from "./config";
+import { buildNextAction, buildRefinedPrompt } from "./rewrite";
 
 export function createDefaultOptions(
   overrides: Partial<QraAnalysisOptions> = {}
@@ -116,6 +117,12 @@ export function buildReport(params: {
     tokenEstimate: params.tokens,
     contextRisk: params.context,
     risk: params.risk,
+    nextAction: buildNextAction(params.features, params.risk.level),
+    refinedPrompt: buildRefinedPrompt(
+      params.input.text,
+      params.features,
+      params.risk.level
+    ),
     confidence,
     reasons,
     summary
