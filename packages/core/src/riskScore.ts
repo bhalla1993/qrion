@@ -6,10 +6,10 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function levelFromScore(score: number): RiskLevel {
-  if (score < 35) {
+  if (score < 30) {
     return "low";
   }
-  if (score < 70) {
+  if (score < 60) {
     return "medium";
   }
   return "high";
@@ -49,46 +49,49 @@ export function computeRiskScore(
   let sensitivity = 0;
   const reasons: string[] = [];
 
+  // Increments scale with how many distinct signals fired, not just presence,
+  // so that queries stacking multiple strong signals can actually reach the
+  // higher end of the 0-100 range instead of plateauing far below it.
   if (features.repoWideSignals.length > 0) {
-    scope += 35;
+    scope += Math.min(100, features.repoWideSignals.length * 50);
     reasons.push("Repo-wide language detected.");
   }
 
   if (features.vagueSignals.length > 0) {
-    ambiguity += 25;
+    ambiguity += Math.min(100, features.vagueSignals.length * 45);
     reasons.push("Vague or broad phrasing detected.");
   }
 
   if (features.multiStepSignals.length > 0) {
-    complexity += 15;
+    complexity += 30;
     reasons.push("Multi-step instructions detected.");
   }
 
   if (features.multiModuleSignals.length > 1) {
-    complexity += 20;
+    complexity += Math.min(60, features.multiModuleSignals.length * 20);
     reasons.push("Multiple modules or layers mentioned.");
   }
 
   if (features.sensitiveSignals.length > 0) {
-    sensitivity += 30;
+    sensitivity += Math.min(100, features.sensitiveSignals.length * 25);
     reasons.push("Sensitive domains (auth, payments, infra, etc.) detected.");
   }
 
   if (features.wordCount > 300) {
-    complexity += 10;
+    complexity += 15;
     reasons.push("Long query; may indicate multi-part work.");
   }
 
   if (features.isVeryShort) {
-    ambiguity += 20;
+    ambiguity += 35;
     reasons.push("Very short query; likely underspecified.");
   }
 
   if (contextRisk.level === "medium") {
-    tokenPressure += 15;
+    tokenPressure += 40;
     reasons.push("Medium context window pressure.");
   } else if (contextRisk.level === "high") {
-    tokenPressure += 30;
+    tokenPressure += 80;
     reasons.push("High context window pressure.");
   }
 

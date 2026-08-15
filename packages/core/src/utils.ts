@@ -82,7 +82,7 @@ export function buildReport(params: {
   context: ContextRisk;
   risk: RiskScore;
   features: QueryFeatureSummary;
-}): AnalyzeReport {
+}): Omit<AnalyzeReport, "model" | "rewrites" | "splits"> {
   const confidence = inferConfidence(
     params.input.text.trim().split(/\s+/).filter(Boolean).length,
     params.index,
@@ -116,9 +116,6 @@ export function buildReport(params: {
     tokenEstimate: params.tokens,
     contextRisk: params.context,
     risk: params.risk,
-    model: { tier: "balanced", reasons: [] }, // model advice is layered on later
-    rewrites: [],
-    splits: [],
     confidence,
     reasons,
     summary

@@ -6,6 +6,18 @@ import process from "node:process";
 import { analyzeQuery, buildRepoIndex } from "@qra/core";
 import type { AnalyzeInput, AnalyzeReport } from "@qra/core";
 
+function getVersion(): string {
+  try {
+    const pkgPath = path.join(__dirname, "..", "package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8")) as {
+      version?: string;
+    };
+    return pkg.version ?? "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+}
+
 function printHelp(): void {
   // eslint-disable-next-line no-console
   console.log(
@@ -21,6 +33,8 @@ function printHelp(): void {
       "Options:",
       "  --file <path>   Read query text from a file.",
       "  --json          Print full analysis as JSON.",
+      "  --help, -h      Show this help message.",
+      "  --version, -v   Print the CLI version.",
       "",
       "Examples:",
       "  qra analyze \"Refactor the auth and billing flows\"",
@@ -248,6 +262,12 @@ async function main(argv: string[]): Promise<void> {
     return;
   }
 
+  if (command === "--version" || command === "-v" || command === "version") {
+    // eslint-disable-next-line no-console
+    console.log(`qra v${getVersion()}`);
+    return;
+  }
+
   if (command === "index") {
     if (rest.length > 0) {
       // eslint-disable-next-line no-console
@@ -266,6 +286,11 @@ async function main(argv: string[]): Promise<void> {
     console.error(`Unknown command: ${command}`);
     printHelp();
     process.exitCode = 1;
+    return;
+  }
+
+  if (rest.includes("--help") || rest.includes("-h")) {
+    printHelp();
     return;
   }
 

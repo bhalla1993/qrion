@@ -2,6 +2,11 @@ import type { QraFileIndexEntry, RelevantFile } from "./types";
 
 export interface FileRankingContext {
   repoFiles: QraFileIndexEntry[];
+  /**
+   * Maximum number of ranked files to return. Defaults to 50 and is
+   * typically sourced from `QraConfig.maxFilesPerQuery`.
+   */
+  maxResults?: number;
 }
 
 export function rankFiles(
@@ -79,6 +84,6 @@ export function rankFiles(
   }
 
   results.sort((a, b) => b.score - a.score);
-  return results.slice(0, 50);
+  return results.slice(0, context.maxResults ?? 50);
 }
 

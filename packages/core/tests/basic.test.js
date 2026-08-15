@@ -1,3 +1,6 @@
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const test = require("node:test");
 const assert = require("node:assert");
 const {
@@ -6,7 +9,8 @@ const {
   computeRiskScore,
   computeContextRisk,
   rankFiles,
-  estimateTokenUsage
+  estimateTokenUsage,
+  buildRepoIndex
 } = require("../dist");
 
 test("vague repo-wide query produces at least medium risk", () => {
@@ -19,6 +23,43 @@ test("vague repo-wide query produces at least medium risk", () => {
   });
 
   assert.ok(report.risk.overall > 0, "expected some non-zero risk score");
+  assert.notStrictEqual(
+    report.risk.level,
+    "low",
+    "expected a vague, repo-wide query to escape the LOW risk bucket"
+  );
+});
+
+test("query stacking repo-wide, vague, multi-step, multi-module, and sensitive signals reaches HIGH risk", () => {
+  const report = analyzeQuery({
+    query: {
+      source: "manual",
+      text:
+        "Please fix everything across the entire project. First refactor the whole " +
+        "codebase, then touch auth, payments, billing, database, schema, migrations, " +
+        "infra, kubernetes, terraform, secrets, api key, and production deployment, " +
+        "across frontend, backend, api, ci, and cd, in one massive change touching all files.",
+      cwd: process.cwd()
+    }
+  });
+
+  assert.strictEqual(
+    report.risk.level,
+    "high",
+    `expected worst-case query to score HIGH risk, got ${report.risk.level} (${report.risk.overall})`
+  );
+});
+
+test("short, narrow, unambiguous query stays LOW risk", () => {
+  const report = analyzeQuery({
+    query: {
+      source: "manual",
+      text: "Update the README formatting to fix a broken markdown table in the intro section.",
+      cwd: process.cwd()
+    }
+  });
+
+  assert.strictEqual(report.risk.level, "low");
 });
 
 test("short, specific query has bounded token estimate", () => {
@@ -94,5 +135,37 @@ test("tokenEstimate grows with more file tokens", () => {
   const many = estimateTokenUsage("short query", [1000, 1000]);
 
   assert.ok(many.totalTokensHigh > few.totalTokensHigh);
+});
+
+test(".qraignore excludes matching directories and file extensions from the repo index", () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "qra-ignore-test-"));
+
+  try {
+    fs.writeFileSync(
+      path.join(tmpDir, ".qraignore"),
+      ["generated", "*.gen.ts", "# a comment", ""].join("\n")
+    );
+
+    fs.mkdirSync(path.join(tmpDir, "generated"));
+    fs.writeFileSync(path.join(tmpDir, "generated", "should-be-ignored.ts"), "export const x = 1;");
+
+    fs.writeFileSync(path.join(tmpDir, "kept.ts"), "export const y = 2;");
+    fs.writeFileSync(path.join(tmpDir, "types.gen.ts"), "export const z = 3;");
+
+    const { files } = buildRepoIndex({ cwd: tmpDir });
+    const paths = files.map((f) => f.path);
+
+    assert.ok(paths.includes("kept.ts"), "expected non-ignored file to be indexed");
+    assert.ok(
+      !paths.some((p) => p.includes("generated")),
+      "expected .qraignore directory rule to exclude the folder"
+    );
+    assert.ok(
+      !paths.includes("types.gen.ts"),
+      "expected .qraignore extension-style rule to exclude matching files"
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
 });
 

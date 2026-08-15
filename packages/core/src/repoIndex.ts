@@ -36,14 +36,84 @@ const DEFAULT_INCLUDE_EXTENSIONS = [
 ];
 
 const APPROX_CHARS_PER_TOKEN = 4;
+const QRAIGNORE_FILENAME = ".qraignore";
 
-function shouldExcludeDir(name: string, excludeDirs: string[]): boolean {
-  return excludeDirs.some((d) => name === d);
+interface QraIgnoreRules {
+  names: Set<string>;
+  extensions: Set<string>;
 }
 
-function shouldIncludeFile(filePath: string, includeExts: string[]): boolean {
+const EMPTY_IGNORE_RULES: QraIgnoreRules = {
+  names: new Set(),
+  extensions: new Set()
+};
+
+/**
+ * Parses a `.qraignore` file at the workspace root, if present. Supports
+ * simple gitignore-style lines: blank lines and `#` comments are skipped,
+ * `*.ext` entries ignore file extensions, and plain names match a directory
+ * or file by exact name anywhere in the tree. Nested globs/paths are not
+ * supported in MVP1 and are ignored rather than mismatched.
+ */
+function loadQraIgnoreRules(cwd: string): QraIgnoreRules {
+  const ignorePath = path.join(cwd, QRAIGNORE_FILENAME);
+  let content: string;
+  try {
+    content = fs.readFileSync(ignorePath, "utf8");
+  } catch {
+    return EMPTY_IGNORE_RULES;
+  }
+
+  const names = new Set<string>();
+  const extensions = new Set<string>();
+
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) {
+      continue;
+    }
+    if (line.startsWith("*.")) {
+      extensions.add(line.slice(1).toLowerCase());
+    } else if (!line.includes("/") && !line.includes("*")) {
+      names.add(line);
+    }
+    // Other glob shapes (e.g. "src/**/*.gen.ts") are not supported yet.
+  }
+
+  return { names, extensions };
+}
+
+function shouldExcludeDir(
+  name: string,
+  excludeDirs: string[],
+  ignoreRules: QraIgnoreRules
+): boolean {
+  return excludeDirs.some((d) => name === d) || ignoreRules.names.has(name);
+}
+
+function matchesIgnoredSuffix(baseNameLower: string, extensions: Set<string>): boolean {
+  for (const suffix of extensions) {
+    if (baseNameLower.endsWith(suffix)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function shouldIncludeFile(
+  filePath: string,
+  includeExts: string[],
+  ignoreRules: QraIgnoreRules
+): boolean {
   const ext = path.extname(filePath).toLowerCase();
   if (!ext) {
+    return false;
+  }
+  const baseNameLower = path.basename(filePath).toLowerCase();
+  if (matchesIgnoredSuffix(baseNameLower, ignoreRules.extensions)) {
+    return false;
+  }
+  if (ignoreRules.names.has(path.basename(filePath))) {
     return false;
   }
   return includeExts.includes(ext);
@@ -113,6 +183,7 @@ export function buildRepoIndex(options: RepoIndexOptions = {}): RepoIndexResult 
   const includeExts = options.includeExtensions ?? DEFAULT_INCLUDE_EXTENSIONS;
   const excludeDirs = options.excludeDirs ?? DEFAULT_EXCLUDE_DIRS;
   const maxFiles = options.maxFiles ?? 2_000;
+  const ignoreRules = loadQraIgnoreRules(cwd);
 
   const entries: QraFileIndexEntry[] = [];
 
@@ -133,12 +204,12 @@ export function buildRepoIndex(options: RepoIndexOptions = {}): RepoIndexResult 
       const relPath = path.relative(cwd, fullPath) || item.name;
 
       if (item.isDirectory()) {
-        if (shouldExcludeDir(item.name, excludeDirs)) {
+        if (shouldExcludeDir(item.name, excludeDirs, ignoreRules)) {
           continue;
         }
         walk(fullPath);
       } else if (item.isFile()) {
-        if (!shouldIncludeFile(fullPath, includeExts)) {
+        if (!shouldIncludeFile(fullPath, includeExts, ignoreRules)) {
           continue;
         }
 

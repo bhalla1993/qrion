@@ -169,6 +169,8 @@ npm test
 
 Once you have built the repo (`npm run build`), you can run Qrion from the terminal.
 
+> **Naming note:** the product and repo are called **Qrion**, but the CLI binary is the shorter `qra` (the underlying **Q**uery **R**isk **A**nalyzer engine). Same tool, two names by design — `qra` for typing speed, "Qrion" for the brand.
+
 ### Analyze a query string
 
 ```bash

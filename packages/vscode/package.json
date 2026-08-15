@@ -42,16 +42,6 @@
           "name": "Qrion Panel"
         }
       ]
-    },
-    "configuration": {
-      "title": "QRA",
-      "properties": {
-        "qra.enableExperimentalFeatures": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable experimental QRA features (no effect yet)."
-        }
-      }
     }
   },
   "scripts": {

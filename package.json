@@ -4,6 +4,14 @@
   "private": true,
   "description": "Query Risk & Scope Analyzer (QRA) monorepo scaffold.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bhalla1993/qrion.git"
+  },
+  "homepage": "https://github.com/bhalla1993/qrion#readme",
+  "bugs": {
+    "url": "https://github.com/bhalla1993/qrion/issues"
+  },
   "workspaces": [
     "packages/*"
   ],
