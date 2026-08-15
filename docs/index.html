@@ -62,6 +62,8 @@
               Qrion is a deterministic pre-flight analyzer for AI coding workflows.
               It helps you spot broad prompts, probable file impact, and context
               pressure before you spend tokens or trigger a large change.
+              It also gives you a next action and a refined prompt draft when
+              the original query needs to be tightened up.
             </p>
 
             <div class="hero-actions">
@@ -101,8 +103,8 @@
                 <strong>Low / High range</strong>
               </article>
               <article class="metric-card">
-                <span>Advice</span>
-                <strong>Rewrite + split</strong>
+                <span>Action</span>
+                <strong>Rewrite + copy</strong>
               </article>
             </div>
 
@@ -173,10 +175,10 @@
             </article>
             <article class="feature-card">
               <p class="card-badge">Shipped</p>
-              <h3>Rewrite and split tips</h3>
+              <h3>Action-first prompt refinement</h3>
               <p>
-                Gives deterministic advice for narrowing broad prompts or
-                breaking them into safer steps.
+                Shows the next best action and a copyable refined prompt so the
+                developer can move from analysis straight to a better query.
               </p>
             </article>
           </div>
@@ -194,7 +196,7 @@
               <li>Read the prompt and extract features such as vague, multi-step, and repo-wide language.</li>
               <li>Index the workspace and rank relevant files using lightweight heuristics.</li>
               <li>Estimate token pressure and compute a risk score with explainable reasons.</li>
-              <li>Return model advice, rewrite tips, split suggestions, and a concise summary.</li>
+              <li>Return model advice, rewrite tips, split suggestions, a next action, and a copyable refined prompt.</li>
             </ol>
           </div>
 
@@ -238,6 +240,10 @@
             <p class="section-label">Use it locally</p>
             <h2>CLI and VS Code workflows stay simple on purpose.</h2>
           </div>
+          <p class="wide-copy">
+            The report now leads with a next action and a refined prompt so the
+            output is useful in the moment, not just informative.
+          </p>
           <div class="workflow-grid">
             <article class="workflow-card">
               <div class="workflow-card-head">

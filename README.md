@@ -12,6 +12,7 @@
 Qrion is a local-only tool that helps you understand the **risk, scope, and token pressure** of an AI coding query **before** you send it to agents like Cursor, GitHub Copilot, Claude, or terminal-based assistants.
 
 Instead of guessing what a prompt might do to your repo, Qrion gives you a fast, deterministic pre-flight analysis so you can adjust the prompt before you burn tokens or trigger repo-wide changes.
+It also gives you a clear next action and a refined prompt draft so the output is useful, not just informative.
 
 ## Why Qrion is different
 
@@ -94,6 +95,9 @@ For a given query and workspace, Qrion computes:
     - Separate analysis from implementation steps.
     - Call out sensitive areas explicitly.
 
+- **Action-first prompt refinement**
+  - Shows the next best action and a copyable refined prompt so you can move directly from analysis to a better agent query.
+
 - **Split suggestions**
   - Suggestions for breaking a broad prompt into smaller prompts:
     - One module per query.
@@ -170,6 +174,7 @@ npm test
 Once you have built the repo (`npm run build`), you can run Qrion from the terminal.
 
 > **Naming note:** the product and repo are called **Qrion**, but the CLI binary is the shorter `qra` (the underlying **Q**uery **R**isk **A**nalyzer engine). Same tool, two names by design — `qra` for typing speed, "Qrion" for the brand.
+The default human-readable CLI output now leads with a next action and a refined prompt draft, while `--json` still returns the full structured report.
 
 ### Analyze a query string
 
@@ -228,6 +233,22 @@ Sample output:
 Query: Refactor the entire project to use ES modules and clean up all technical debt.
 
 Summary: Risk: MEDIUM (48/100). Estimated tokens: query ~22, files ~3000–5500, total ~3022–5522.
+Next action: Consider tightening the prompt: narrow the scope from repo-wide to specific areas, and separate analysis from implementation steps.
+Refined prompt:
+  Please help with the following task.
+  
+  Task:
+  Refactor the entire project to use ES modules and clean up all technical debt.
+  
+  Guidance:
+  - First identify the smallest safe scope and list the likely files or modules before editing.
+  - Separate analysis from implementation steps.
+  - State the expected outcome and acceptance criteria clearly before making changes.
+  
+  Return:
+  - a short plan
+  - the minimal implementation or analysis
+  - a short summary of what changed
 Context risk: LOW against ~128000 token window. Likely relevant files: 1.
 
 Risk: MEDIUM (48/100)
@@ -288,6 +309,8 @@ Qrion uses the current workspace folder as the **workspace root** for indexing.
 
 After running any Qrion command, the **Qrion** view in the activity bar will show:
 
+- Next action.
+- A copyable refined prompt.
 - Risk level and score.
 - Token estimates and context risk.
 - Likely relevant files (with reasons).
