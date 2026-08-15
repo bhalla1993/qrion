@@ -52,7 +52,9 @@ export function analyzeQuery(params: AnalyzeQueryParams): AnalyzeReport {
     cwd: input.cwd
   });
 
-  const relevantFiles = options.includeFileRanking
+  const shouldShowFileRanking =
+    options.includeFileRanking && features.intent !== "out-of-scope";
+  const relevantFiles = shouldShowFileRanking
     ? rankFiles(input.text, {
         repoFiles: indexResult.files,
         maxResults: defaultConfig.maxFilesPerQuery,

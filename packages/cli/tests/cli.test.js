@@ -31,6 +31,9 @@ test("shows help for analyze", () => {
 
   assert.match(output, /Query Risk & Scope Analyzer \(QRA\) CLI/);
   assert.match(output, /qra analyze --json "<query>"/);
+  assert.match(output, /--verbose, -V/);
+  assert.match(output, /--color/);
+  assert.match(output, /--no-color/);
 });
 
 test("analyze --json returns a parseable report", () => {
@@ -49,9 +52,21 @@ test("analyze --json returns a parseable report", () => {
 test("analyze human-readable output highlights the action and prompt", () => {
   const output = runCli(["analyze", "Refactor the auth and billing flows across the repo."]);
 
+  assert.match(output, /Verdict:/);
+  assert.match(output, /Intent:/);
   assert.match(output, /Next action:/);
   assert.match(output, /Refined prompt:/);
-  assert.match(output, /Task:/);
+  assert.match(output, /Top files:/);
+});
+
+test("analyze human-readable output stays concise by default", () => {
+  const output = runCli(["analyze", "Update the README formatting."]);
+
+  assert.match(output, /Verdict:/);
+  assert.match(output, /Top files:/);
+  assert.doesNotMatch(output, /Summary:/);
+  assert.doesNotMatch(output, /Tokens:/);
+  assert.doesNotMatch(output, /Confidence:/);
 });
 
 test("analyze human-readable output adapts for repo-survey prompts", () => {
@@ -63,6 +78,14 @@ test("analyze human-readable output adapts for repo-survey prompts", () => {
   assert.match(output, /repository understanding task/i);
   assert.match(output, /purpose of the repo/i);
   assert.match(output, /remaining gaps/i);
+});
+
+test("analyze human-readable output shows out-of-scope guidance", () => {
+  const output = runCli(["analyze", "Hi, how are you doing?"]);
+
+  assert.match(output, /Intent:/);
+  assert.match(output, /out-of-scope/i);
+  assert.match(output, /outside Qrion's scope/i);
 });
 
 test("analyze human-readable output seeds repo docs in a fresh workspace", () => {
@@ -97,7 +120,37 @@ test("analyze human-readable output seeds repo docs in a fresh workspace", () =>
 });
 
 test("analyze human-readable output uses compact token units", () => {
-  const output = runCli(["analyze", "Update the README formatting."]);
+  const output = runCli(["analyze", "--verbose", "Update the README formatting."]);
 
   assert.match(output, /128k token window/i);
+});
+
+test("analyze --verbose prints the full report", () => {
+  const output = runCli(["analyze", "--verbose", "Update the README formatting."]);
+
+  assert.match(output, /Summary:/);
+  assert.match(output, /Tokens:/);
+  assert.match(output, /Confidence:/);
+  assert.match(output, /Rewrite suggestions:/);
+  assert.match(output, /Split suggestions:/);
+});
+
+test("analyze output can be colorized with --color", () => {
+  const output = runCli(["analyze", "--color", "Update the README formatting."]);
+
+  assert.match(output, /\u001b\[[0-9;]*m/);
+  assert.match(output, /Verdict:/);
+  assert.match(output, /Top files:/);
+});
+
+test("analyze --no-color suppresses color output", () => {
+  const output = runCli(["analyze", "--no-color", "Update the README formatting."], {
+    env: {
+      ...process.env,
+      FORCE_COLOR: "1"
+    }
+  });
+
+  assert.doesNotMatch(output, /\u001b\[[0-9;]*m/);
+  assert.match(output, /Verdict:/);
 });

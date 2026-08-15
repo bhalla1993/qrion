@@ -4,7 +4,7 @@ import type {
   WebviewViewProvider
 } from "vscode";
 import * as vscode from "vscode";
-import type { AnalyzeReport, RelevantFile } from "@qra/core";
+import type { AnalyzeReport, PromptIntent, RelevantFile } from "@qra/core";
 
 function escapeHtml(value: string): string {
   return value
@@ -13,8 +13,11 @@ function escapeHtml(value: string): string {
     .replace(/>/g, "&gt;");
 }
 
-function renderRelevantFiles(files: RelevantFile[]): string {
+function renderRelevantFiles(files: RelevantFile[], intent: PromptIntent): string {
   if (files.length === 0) {
+    if (intent === "out-of-scope") {
+      return "<p>This prompt is outside Qrion's scope, so no files were ranked.</p>";
+    }
     return "<p>No strongly relevant files detected.</p>";
   }
 
@@ -28,6 +31,17 @@ function renderRelevantFiles(files: RelevantFile[]): string {
   });
 
   return `<ul>${items.join("")}</ul>`;
+}
+
+function intentTagClass(intent: PromptIntent): string {
+  switch (intent) {
+    case "code-change":
+      return "tag tag-intent-code-change";
+    case "repo-survey":
+      return "tag tag-intent-repo-survey";
+    case "out-of-scope":
+      return "tag tag-intent-out-of-scope";
+  }
 }
 
 export class QraPanelProvider implements WebviewViewProvider {
@@ -132,8 +146,14 @@ export class QraPanelProvider implements WebviewViewProvider {
       .tag-low { background: #1e8e3e33; color: #1e8e3e; }
       .tag-medium { background: #f9ab0033; color: #b76e00; }
       .tag-high { background: #d9302533; color: #a50e0e; }
+      .tag-intent-code-change { background: #0984e333; color: #0984e3; }
+      .tag-intent-repo-survey { background: #7b1fa233; color: #7b1fa2; }
+      .tag-intent-out-of-scope { background: #5f6b7a33; color: #5f6b7a; }
       .next-action {
         font-weight: 600;
+      }
+      .out-of-scope-card {
+        border-left: 4px solid #5f6b7a;
       }
       .copy-button {
         border: 1px solid var(--vscode-button-border, transparent);
@@ -198,6 +218,16 @@ export class QraPanelProvider implements WebviewViewProvider {
 
     const riskTagClass = `tag tag-${escapeHtml(r.risk.level)}`;
     const contextTagClass = `tag tag-${escapeHtml(r.contextRisk.level)}`;
+    const intentClass = intentTagClass(r.queryFeatures.intent);
+    const outOfScopeMessage =
+      r.queryFeatures.intent === "out-of-scope"
+        ? [
+            "<div class=\"section-card out-of-scope-card\">",
+            "<p><strong>Out of scope:</strong> This looks like general chat, not a coding or repository analysis request.</p>",
+            "<p>Try asking about a file, module, bug, repo overview, or change.</p>",
+            "</div>"
+          ].join("")
+        : "";
 
     const rewriteItems =
       r.rewrites.length === 0
@@ -246,6 +276,11 @@ export class QraPanelProvider implements WebviewViewProvider {
       "<h1>Qrion</h1>",
       `<p>${escapeHtml(r.summary)}</p>`,
 
+      "<h2>Intent</h2>",
+      `<p><span class="${intentClass}">${escapeHtml(r.queryFeatures.intent.toUpperCase())}</span></p>`,
+
+      outOfScopeMessage,
+
       "<h2>Next action</h2>",
       `<div class="section-card"><p class="next-action">${escapeHtml(
         r.nextAction
@@ -280,7 +315,7 @@ export class QraPanelProvider implements WebviewViewProvider {
         : "",
 
       "<h2>Likely relevant files</h2>",
-      renderRelevantFiles(r.relevantFiles),
+      renderRelevantFiles(r.relevantFiles, r.queryFeatures.intent),
 
       "<h2>Rewrite suggestions</h2>",
       rewriteItems,

@@ -86,6 +86,22 @@ test("repo-survey prompt gets repo-understanding guidance", () => {
   assert.deepStrictEqual(report.splits, []);
 });
 
+test("general chat prompt is marked out of scope", () => {
+  const report = analyzeQuery({
+    query: {
+      source: "manual",
+      text: "Hi, how are you doing?",
+      cwd: process.cwd()
+    }
+  });
+
+  assert.strictEqual(report.queryFeatures.intent, "out-of-scope");
+  assert.match(report.nextAction, /outside Qrion's scope/i);
+  assert.match(report.refinedPrompt, /Qrion is for code-change and repository understanding prompts/i);
+  assert.deepStrictEqual(report.rewrites, []);
+  assert.deepStrictEqual(report.splits, []);
+});
+
 test("repo-survey prompt seeds the repo map in a fresh workspace", () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "qra-survey-test-"));
 

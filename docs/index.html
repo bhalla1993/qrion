@@ -62,8 +62,9 @@
               Qrion is a deterministic pre-flight analyzer for AI coding workflows.
               It helps you spot broad prompts, probable file impact, and context
               pressure before you spend tokens or trigger a large change.
-              It also gives you a next action and a refined prompt draft when
-              the original query needs to be tightened up.
+              The terminal output now leads with a verdict, intent, next action,
+              refined prompt, and top files, with `--verbose` available for the
+              full breakdown.
             </p>
 
             <div class="hero-actions">
@@ -85,8 +86,10 @@
             <p class="panel-kicker">Current release</p>
             <h2>MVP1 is shipped</h2>
             <p class="panel-copy">
-              The current release includes the shared analyzer core, CLI output,
-              VS Code shell, and regression tests.
+              The current release includes the shared analyzer core, concise CLI
+              output, optional verbose details, colorized terminal output in
+              supported terminals, explicit color flags, out-of-scope guidance
+              for general chat, the VS Code shell, and regression tests.
             </p>
 
             <div class="metric-grid">
@@ -241,8 +244,12 @@
             <h2>CLI and VS Code workflows stay simple on purpose.</h2>
           </div>
           <p class="wide-copy">
-            The report now leads with a next action and a refined prompt so the
-            output is useful in the moment, not just informative.
+            The report now leads with the verdict, intent, next action, refined
+            prompt, and top files so the default output stays useful in the
+            moment, not just informative. Use `--verbose` when you want the full
+            risk and token breakdown, `--color` to force colors, and
+            `--no-color` to disable them. General chat prompts are now called
+            out of scope instead of being treated like code-change requests.
           </p>
           <div class="workflow-grid">
             <article class="workflow-card">

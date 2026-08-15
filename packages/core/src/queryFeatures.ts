@@ -1,6 +1,6 @@
 import type { QraQueryInput } from "./types";
 
-export type PromptIntent = "code-change" | "repo-survey";
+export type PromptIntent = "code-change" | "repo-survey" | "out-of-scope";
 
 export interface QueryFeatureSummary {
   length: number;
@@ -14,6 +14,7 @@ export interface QueryFeatureSummary {
   multiModuleSignals: string[];
   sensitiveSignals: string[];
   repoWideSignals: string[];
+  outOfScopeSignals: string[];
 }
 
 const VAGUE_PATTERNS = [
@@ -110,11 +111,36 @@ const REPO_SURVEY_PATTERNS = [
   "what do i have here"
 ];
 
+const OUT_OF_SCOPE_PATTERNS = [
+  /\bhi\b/i,
+  /\bhello\b/i,
+  /\bhey\b/i,
+  /\bhow are you\b/i,
+  /\bwhat'?s up\b/i,
+  /\bgood morning\b/i,
+  /\bgood afternoon\b/i,
+  /\bgood evening\b/i,
+  /\bwho are you\b/i,
+  /\bthank you\b/i,
+  /\bthanks\b/i,
+  /\btell me a joke\b/i
+];
+
 function collectMatches(textLower: string, patterns: string[]): string[] {
   const hits: string[] = [];
   for (const pattern of patterns) {
     if (textLower.includes(pattern)) {
       hits.push(pattern);
+    }
+  }
+  return hits;
+}
+
+function collectRegexMatches(text: string, patterns: RegExp[]): string[] {
+  const hits: string[] = [];
+  for (const pattern of patterns) {
+    if (pattern.test(text)) {
+      hits.push(pattern.source.replace(/\\b/g, "").replace(/\\/g, ""));
     }
   }
   return hits;
@@ -134,10 +160,15 @@ export function extractQueryFeatures(input: QraQueryInput): QueryFeatureSummary 
   const sensitiveSignals = collectMatches(textLower, SENSITIVE_TOKENS);
   const repoWideSignals = collectMatches(textLower, REPO_WIDE_PATTERNS);
   const repoSurveySignals = collectMatches(textLower, REPO_SURVEY_PATTERNS);
+  const outOfScopeSignals = collectRegexMatches(textLower, OUT_OF_SCOPE_PATTERNS);
 
   const isVeryShort = wordCount < 5;
   const isVeryLong = wordCount > 400;
-  const intent: PromptIntent = repoSurveySignals.length > 0 ? "repo-survey" : "code-change";
+  const intent: PromptIntent = repoSurveySignals.length > 0
+    ? "repo-survey"
+    : outOfScopeSignals.length > 0
+      ? "out-of-scope"
+      : "code-change";
 
   return {
     length,
@@ -150,7 +181,8 @@ export function extractQueryFeatures(input: QraQueryInput): QueryFeatureSummary 
     multiStepSignals,
     multiModuleSignals,
     sensitiveSignals,
-    repoWideSignals
+    repoWideSignals,
+    outOfScopeSignals
   };
 }
 

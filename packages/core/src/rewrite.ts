@@ -25,7 +25,7 @@ function buildDirectiveList(
   features: QueryFeatureSummary,
   riskLevel: RiskLevel
 ): string[] {
-  if (features.intent === "repo-survey") {
+  if (features.intent !== "code-change") {
     return [];
   }
 
@@ -71,7 +71,7 @@ function buildDirectiveList(
 export function buildRewriteSuggestions(
   features: QueryFeatureSummary
 ): RewriteSuggestion[] {
-  if (features.intent === "repo-survey") {
+  if (features.intent !== "code-change") {
     return [];
   }
 
@@ -132,6 +132,9 @@ export function buildNextAction(
   if (features.intent === "repo-survey") {
     return "Treat this as a repository understanding task: summarize the repo purpose, what has been implemented, and what remains, citing the most relevant files.";
   }
+  if (features.intent === "out-of-scope") {
+    return "This looks outside Qrion's scope: ask a code-change or repository question, such as what a file does, what needs to change, or what has been implemented.";
+  }
 
   const directives = buildDirectiveList(features, riskLevel);
 
@@ -172,6 +175,20 @@ export function buildRefinedPrompt(
       "- the implemented areas",
       "- the remaining gaps",
       "- any important files to read next"
+    ].join("\n");
+  }
+
+  if (features.intent === "out-of-scope") {
+    return [
+      "Qrion is for code-change and repository understanding prompts.",
+      "",
+      "Your query:",
+      task,
+      "",
+      "Try instead:",
+      "- asking what a specific file, module, or repo area does",
+      "- asking for help with a code change, bug, or refactor",
+      "- asking for a repo overview or what remains to be built"
     ].join("\n");
   }
 

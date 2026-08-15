@@ -62,6 +62,10 @@ For a given query and workspace, Qrion computes:
     - Multi-module queries (auth, payments, API, DB, frontend/backend, CI/CD).
     - Sensitive domains (auth, billing, DB schema, migrations, infra, secrets).
 
+- **Prompt intent detection**
+  - Distinguishes code-change, repo-survey, and out-of-scope prompts.
+  - Gives a clear guidance message when the prompt is just general chat and not a coding task.
+
 - **Likely relevant files**
   - Indexes your workspace and ranks files using:
     - Filename tokens.
@@ -174,12 +178,18 @@ npm test
 Once you have built the repo (`npm run build`), you can run Qrion from the terminal.
 
 > **Naming note:** the product and repo are called **Qrion**, but the CLI binary is the shorter `qra` (the underlying **Q**uery **R**isk **A**nalyzer engine). Same tool, two names by design — `qra` for typing speed, "Qrion" for the brand.
-The default human-readable CLI output now leads with a next action and a refined prompt draft, while `--json` still returns the full structured report.
+The default human-readable CLI output now stays concise and colorized in supported terminals: it leads with the verdict, intent, next action, refined prompt, and top files. Use `--verbose` when you want the full risk/token breakdown, `--color` to force colors, `--no-color` to disable them, and `--json` when you want the full structured report.
 
 ### Analyze a query string
 
 ```bash
 npx qra analyze "Refactor auth module to use JWT instead of sessions."
+```
+
+### Verbose terminal report
+
+```bash
+npx qra analyze --verbose "Refactor auth module to use JWT instead of sessions."
 ```
 
 ### Analyze from a file
@@ -232,7 +242,9 @@ Sample output:
 === Query Risk & Scope Analyzer (QRA) ===
 Query: Refactor the entire project to use ES modules and clean up all technical debt.
 
-Summary: Risk: MEDIUM (48/100). Estimated tokens: query ~22, files ~3000–5500, total ~3022–5522.
+Verdict: MEDIUM risk (48/100)
+Intent: code-change
+
 Next action: Consider tightening the prompt: narrow the scope from repo-wide to specific areas, and separate analysis from implementation steps.
 Refined prompt:
   Please help with the following task.
@@ -249,26 +261,11 @@ Refined prompt:
   - a short plan
   - the minimal implementation or analysis
   - a short summary of what changed
-Context risk: LOW against ~128000 token window. Likely relevant files: 1.
 
-Risk: MEDIUM (48/100)
-  Reasons: Repo-wide language detected. | Vague or broad phrasing detected. | Long query; may indicate multi-part work.
-Tokens: query ~22
-  files ~3000-5500
-  total ~3022-5522
-Context risk: LOW
-  limit ~128000 tokens, headroom ~122478
-Model tier: BALANCED
-  Reasons: Medium overall risk; balanced model is appropriate.
-Relevant files:
-  - packages/core/src/analyze.ts (score 7, ~625 tokens) – folder matches: core | filename matches: analyze
-Rewrite suggestions:
-  - Clarify the intent and expected outcome.
-  - Narrow the scope from repo-wide to specific areas.
-Split suggestions:
-  - Turn repo-wide refactors into a series of smaller passes.
-Confidence: MEDIUM
-  Reasons: No strongly matching files detected.
+Top files:
+  - packages/core/src/analyze.ts (score 7, ~625 tokens) - folder matches: core | filename matches: analyze
+
+Use `--verbose` to see the full risk, token, context, model, and confidence breakdown.
 ```
 
 ## VS Code extension usage (`@qra/vscode`)
@@ -309,11 +306,13 @@ Qrion uses the current workspace folder as the **workspace root** for indexing.
 
 After running any Qrion command, the **Qrion** view in the activity bar will show:
 
+- Intent tag for code-change, repo-survey, or out-of-scope prompts.
 - Next action.
 - A copyable refined prompt.
 - Risk level and score.
 - Token estimates and context risk.
 - Likely relevant files (with reasons).
+- An out-of-scope callout when the prompt is not a coding or repository task.
 - Model tier recommendation.
 - Rewrite suggestions.
 - Split suggestions.
