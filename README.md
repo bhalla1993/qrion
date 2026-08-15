@@ -1,33 +1,51 @@
 ## Qrion
 
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Local Only](https://img.shields.io/badge/Local--only-Yes-2E7D32)](#)
+[![No AI Calls](https://img.shields.io/badge/No%20AI%20calls-Yes-7B1FA2)](#)
+[![CLI](https://img.shields.io/badge/CLI-Yes-111827)](#cli-usage-qra-cli)
+[![VS Code Extension](https://img.shields.io/badge/VS%20Code%20extension-Yes-007ACC)](#vs-code-extension-usage-qra-vscode)
+[![Static Analysis](https://img.shields.io/badge/Static%20analysis-Yes-0F766E)](#mvp1-features)
+
 **Pre-query Query Risk & Scope Analyzer for AI coding workflows.**
 
 Qrion is a local-only tool that helps you understand the **risk, scope, and token pressure** of an AI coding query **before** you send it to agents like Cursor, GitHub Copilot, Claude, or terminal-based assistants.
 
-Instead of guessing what a prompt might do to your repo, Qrion gives you a fast, deterministic “pre-flight” analysis so you can adjust the prompt before you burn tokens or trigger repo-wide changes.
+Instead of guessing what a prompt might do to your repo, Qrion gives you a fast, deterministic pre-flight analysis so you can adjust the prompt before you burn tokens or trigger repo-wide changes.
 
-### Why Qrion exists
+## Why Qrion is different
 
-Modern AI coding tools are powerful, but it’s easy to:
+Qrion is not trying to predict an agent exactly. It is trying to help you **write better prompts**.
 
-- Send **vague or broad prompts** that confuse the agent.
-- Accidentally ask for **repo-wide refactors**.
-- Blow through **token limits and budgets** on over-scoped queries.
-- Touch **sensitive areas** (auth, payments, infra) without realizing the risk.
+That means:
 
-Qrion sits **one step before** your agent. You run Qrion on your query first, see what it thinks the scope and risk are, then refine your prompt and send it to your agent of choice.
+- Local-only analysis on your machine.
+- Deterministic heuristics instead of AI calls.
+- Agent-agnostic output you can use with Cursor, Copilot, Claude, or other agent tools.
+- Clear reasons for every score and suggestion.
 
-Qrion is:
-
-- **Local-first**: runs on your machine, no external services.
-- **Agent-agnostic**: works with Cursor, Copilot, Claude, etc.
-- **Heuristic and deterministic**: no AI calls; behavior is explainable.
+Qrion is meant for the moment **before** you send the query.
 
 > Status: **MVP1 analyzer is implemented and usable**, but still evolving. Heuristics are approximate and intentionally conservative.
 
----
+## Who Qrion is for
 
-### MVP1 features
+Qrion is useful for developers who:
+
+- Use AI coding tools daily.
+- Work with limited token budgets or plan limits.
+- Want to avoid vague, broad, or expensive prompts.
+- Care about understanding scope before asking an agent to change code.
+- Prefer static analysis and explainable heuristics over black-box behavior.
+
+It is especially helpful for teams and solo developers using tools such as:
+
+- Cursor
+- GitHub Copilot
+- Claude Code / Claude-based workflows
+- Terminal-based agent workflows
+
+## MVP1 features
 
 For a given query and workspace, Qrion computes:
 
@@ -84,9 +102,29 @@ For a given query and workspace, Qrion computes:
 
 None of this simulates an agent or guarantees exact behavior. It’s a **prompt linting and planning tool**, not a code execution engine.
 
----
+## Architecture overview
 
-### Monorepo structure
+```text
+                +---------------------------+
+                |   Developer writes query  |
+                +-------------+-------------+
+                              |
+                              v
+                +---------------------------+
+                |   Qrion core heuristics   |
+                |  query / repo / scoring   |
+                +------+------+-------------+
+                       |      |
+           +-----------+      +------------------+
+           |                                     |
+           v                                     v
+  +-------------------+                +-----------------------+
+  |   CLI (`qra`)     |                |  VS Code extension    |
+  | human / JSON out   |                |  sidebar + commands   |
+  +-------------------+                +-----------------------+
+```
+
+## Repository structure
 
 - **Root**
   - `package.json`: npm workspaces, shared scripts.
@@ -94,12 +132,16 @@ None of this simulates an agent or guarantees exact behavior. It’s a **prompt 
   - `.gitignore`: standard Node/TypeScript ignores.
   - `.qraignore`: patterns Qrion may use when scanning a repository.
   - `MVP1.md`: internal MVP1 planning doc.
-- **packages/**
-  - `core`: shared TypeScript library for query analysis (implemented heuristics).
-  - `cli`: command-line interface for running Qrion locally.
-  - `vscode`: VS Code extension integration.
 
----
+- **`packages/core`**
+  - Shared TypeScript library for query analysis heuristics.
+  - Main entrypoint: `analyzeQuery(AnalyzeInput): AnalyzeReport`.
+
+- **`packages/cli`**
+  - Command-line interface for running Qrion locally.
+
+- **`packages/vscode`**
+  - VS Code extension integration with a Qrion sidebar.
 
 ## Getting started
 
@@ -115,7 +157,7 @@ npm install
 npm run build
 ```
 
-### 3. Run tests (core heuristics)
+### 3. Run tests
 
 ```bash
 npm test
@@ -123,101 +165,36 @@ npm test
 
 > Heuristics are approximate by design. Qrion does **not** simulate any specific agent and does **not** guarantee exact file or token usage.
 
----
-
-## Quick start: try Qrion on this repo
-
-1. **Clone and build:**
-
-   ```bash
-   git clone https://github.com/bhalla1993/qrion.git
-   cd qrion
-   npm install
-   npm run build
-   ```
-
-2. **Run an analysis (from the `qrion` folder):**
-
-   ```bash
-   npx qra analyze "Refactor the entire project to use ES modules and clean up all technical debt."
-   ```
-
-   This:
-
-   - Indexes the current repo (`qrion`) using simple static analysis.
-   - Prints a summary with:
-     - Risk level and score.
-     - Token and context window risk estimates.
-     - Likely relevant files (with reasons).
-     - Model tier recommendation.
-     - Rewrite and split suggestions.
-
-   Example output:
-
-   ```text
-   === Query Risk & Scope Analyzer (QRA) ===
-   Query: Refactor the entire project to use ES modules and clean up all technical debt.
-
-   Summary: Risk: MEDIUM (48/100). Estimated tokens: query ~22, files ~3000–5500, total ~3022–5522.
-   Context risk: LOW against ~128000 token window. Likely relevant files: 1.
-
-   Risk: MEDIUM (48/100)
-     Reasons: Repo-wide language detected. | Vague or broad phrasing detected. | Long query; may indicate multi-part work.
-   Tokens: query ~22
-     files ~3000-5500
-     total ~3022-5522
-   Context risk: LOW
-     limit ~128000 tokens, headroom ~122478
-   Model tier: BALANCED
-     Reasons: Medium overall risk; balanced model is appropriate.
-   Top relevant files:
-     - packages/core/src/analyze.ts (score 7, ~625 tokens) – folder matches: core | filename matches: analyze
-   Rewrite suggestions:
-     - Clarify the intent and expected outcome.
-     - Narrow the scope from repo-wide to specific areas.
-   Split suggestions:
-     - Turn repo-wide refactors into a series of smaller passes.
-   Confidence: MEDIUM
-     Reasons: No strongly matching files detected.
-   ```
-
-3. **JSON output (for debugging or tooling):**
-
-   ```bash
-   npx qra analyze --json "Refactor the auth and billing flows across the repo and update database migrations."
-   ```
-
----
-
 ## CLI usage (`@qra/cli`)
 
-Once you have built the repo (`npm run build`), you can run Qrion in two main ways.
+Once you have built the repo (`npm run build`), you can run Qrion from the terminal.
 
-### 1. Analyze the `qrion` repo itself (from this folder)
+### Analyze a query string
 
 ```bash
-npx qra analyze "Refactor the auth and billing flows"
+npx qra analyze "Refactor auth module to use JWT instead of sessions."
 ```
 
-Or from a file:
+### Analyze from a file
 
 ```bash
+echo "Refactor the auth and billing flows across the repo and update database migrations." > prompt.txt
 npx qra analyze --file prompt.txt
 ```
 
-For tooling or scripts, use JSON output:
+### JSON output
 
 ```bash
-npx qra analyze --json "Refactor the auth and billing flows"
+npx qra analyze --json "Refactor the auth and billing flows across the repo and update database migrations."
 ```
 
-### 2. Analyze another project (while Qrion lives in a sibling folder)
+### Analyze another project
 
-Suppose you have:
+If you have:
 
 ```text
 /code/qrion      # this repo
-/code/my-app    # your project
+/code/my-app     # your project
 ```
 
 From inside `my-app`:
@@ -232,9 +209,44 @@ Qrion will:
 - Index `my-app`’s files.
 - Analyze your prompt against that repo.
 
-> In a future release, the CLI will likely be published to npm so you can simply run `npx @qra/cli analyze ...` from any project without cloning this repo.
+> In a future release, the CLI may be published to npm so you can run `npx @qra/cli analyze ...` from any project without cloning this repo.
 
----
+## Example CLI output
+
+Command:
+
+```bash
+npx qra analyze "Refactor the entire project to use ES modules and clean up all technical debt."
+```
+
+Sample output:
+
+```text
+=== Query Risk & Scope Analyzer (QRA) ===
+Query: Refactor the entire project to use ES modules and clean up all technical debt.
+
+Summary: Risk: MEDIUM (48/100). Estimated tokens: query ~22, files ~3000–5500, total ~3022–5522.
+Context risk: LOW against ~128000 token window. Likely relevant files: 1.
+
+Risk: MEDIUM (48/100)
+  Reasons: Repo-wide language detected. | Vague or broad phrasing detected. | Long query; may indicate multi-part work.
+Tokens: query ~22
+  files ~3000-5500
+  total ~3022-5522
+Context risk: LOW
+  limit ~128000 tokens, headroom ~122478
+Model tier: BALANCED
+  Reasons: Medium overall risk; balanced model is appropriate.
+Relevant files:
+  - packages/core/src/analyze.ts (score 7, ~625 tokens) – folder matches: core | filename matches: analyze
+Rewrite suggestions:
+  - Clarify the intent and expected outcome.
+  - Narrow the scope from repo-wide to specific areas.
+Split suggestions:
+  - Turn repo-wide refactors into a series of smaller passes.
+Confidence: MEDIUM
+  Reasons: No strongly matching files detected.
+```
 
 ## VS Code extension usage (`@qra/vscode`)
 
@@ -282,7 +294,7 @@ After running any Qrion command, the **Qrion** view in the activity bar will sho
 - Split suggestions.
 - Confidence and a short summary.
 
-#### Screenshot placeholders
+### Screenshot placeholders
 
 - **Screenshot 1**: Qrion sidebar panel showing a Medium-risk analysis for a repo-wide refactor query.
 - **Screenshot 2**: Command Palette with:
@@ -292,37 +304,21 @@ After running any Qrion command, the **Qrion** view in the activity bar will sho
 
 These can be added later as actual images under `packages/vscode/media/` and referenced here.
 
----
+## Examples
 
-## Packages
+Try Qrion with prompts like these:
 
-- **`@qra/core`**
-  - Shared, pure TypeScript library that implements:
-    - Query feature extraction (vague, multi-step, multi-module, sensitive, repo-wide).
-    - Lightweight repo indexing (paths, folder/file tokens, import and symbol hints, approximate token count).
-    - File relevance ranking.
-    - Token and context window risk estimation.
-    - Risk scoring (0–100) and model tier recommendation.
-    - Rewrite and split suggestion heuristics.
-  - Exposes a single entry point: `analyzeQuery(AnalyzeInput): AnalyzeReport`.
+- `Refactor auth module to use JWT instead of sessions.`
+  - Likely signals: sensitive area, focused scope, moderate token pressure.
 
-- **`@qra/cli`**
-  - CLI entry point for running Qrion from the terminal.
-  - Commands:
-    - `qra analyze "<query>"`
-    - `qra analyze --file path/to/prompt.txt`
-    - `qra analyze --json "<query>"`
-  - Default output: human-readable summary with risk, tokens, context risk, relevant files, model tier, and suggestions.
+- `Fix everything across the whole codebase and make it production ready.`
+  - Likely signals: vague, repo-wide, broad scope, split suggestion.
 
-- **`@qra/vscode`**
-  - VS Code extension integration.
-  - Commands:
-    - Qrion: Analyze Selected Text
-    - Qrion: Analyze Clipboard Text
-    - Qrion: Analyze Custom Query
-  - Shows a side panel (Qrion view) with the same report information as the CLI.
+- `First update the API routes, then adjust the DB schema, then add tests.`
+  - Likely signals: multi-step, multi-module, rewrite and split suggestions.
 
----
+- `Improve the frontend performance and clean up the backend logging and caching.`
+  - Likely signals: multi-module, likely medium or high scope risk.
 
 ## Roadmap
 
@@ -342,9 +338,9 @@ Qrion is being developed in stages.
 
 *(Not implemented yet – design stage only.)*
 
-- Observe real agent runs (locally) to:
+- Observe real agent runs locally to:
   - Compare pre-query estimates vs. actual file touches and token usage.
-  - Surface “surprises” where the agent did more/less than expected.
+  - Surface “surprises” where the agent did more or less than expected.
   - Feed back into heuristic tuning.
 
 ### MVP3 – Optimization and guardrails (planned)
@@ -354,11 +350,35 @@ Qrion is being developed in stages.
 - Smarter suggestions to:
   - Automatically propose cheaper, narrower prompts.
   - Warn when a query is likely to exceed budget or context limits.
-  - Offer simple guardrails (e.g., “only touch these folders/files” hints).
+  - Offer simple guardrails such as “only touch these folders/files” hints.
 
----
+## Contributing
 
-## Limitations & scope
+Qrion is intentionally small and OSS-friendly. Contributions are welcome.
+
+### Good first contributions
+
+- Improve heuristic wording or thresholds.
+- Add core tests for edge cases.
+- Add sample queries to the README.
+- Improve panel styling or command UX in the VS Code extension.
+
+### Before you open a PR
+
+- Keep the core local-only and deterministic.
+- Avoid adding heavy dependencies unless they clearly improve the MVP.
+- Add or update tests when changing heuristics.
+- Keep public-facing wording honest about approximation and scope.
+
+### Development flow
+
+```bash
+npm install
+npm run build
+npm test
+```
+
+## Limitations
 
 To keep Qrion simple, fast, and local-only, MVP1 **does not**:
 
@@ -369,9 +389,7 @@ To keep Qrion simple, fast, and local-only, MVP1 **does not**:
 
 It is meant as a **prompt linting / pre-flight assistant**, not as a guarantee of what your agent will do.
 
----
-
-## Discoverability & topics
+## Discoverability
 
 Qrion is aimed at developers who:
 
@@ -381,5 +399,5 @@ Qrion is aimed at developers who:
 
 Suggested GitHub topics:
 
-`ai`, `developer-tools`, `cli`, `vscode-extension`, `prompt-engineering`, `prompt-linting`, `static-analysis`, `copilot`, `cursor`, `claude`, `token`, `context-window`, `refactoring`.
+`ai`, `developer-tools`, `cli`, `vscode-extension`, `prompt-engineering`, `prompt-linting`, `static-analysis`, `copilot`, `cursor`, `claude`, `token`, `context-window`, `refactoring`, `code-analysis`, `code-refactoring`, `agent-tools`.
 
