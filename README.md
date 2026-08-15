@@ -399,7 +399,5 @@ Qrion is aimed at developers who:
 - Have token or budget constraints.
 - Care about avoiding repo-wide surprises and wasted queries.
 
-Suggested GitHub topics:
-
-`ai`, `developer-tools`, `cli`, `vscode-extension`, `prompt-engineering`, `prompt-linting`, `static-analysis`, `copilot`, `cursor`, `claude`, `token`, `context-window`, `refactoring`, `code-analysis`, `code-refactoring`, `agent-tools`.
+GitHub topics are configured in the repository's **About** section, so the README does not duplicate them here.
 

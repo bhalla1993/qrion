@@ -20,7 +20,7 @@
     "build:core": "npm run build --workspace @qra/core",
     "build:cli": "npm run build --workspace @qra/cli",
     "build:vscode": "npm run build --workspace @qra/vscode",
-    "test": "npm test --workspaces",
+    "test": "npm run build && npm test --workspaces",
     "clean": "npm run clean --workspaces || true"
   },
   "devDependencies": {

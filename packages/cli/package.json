@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "echo \"No CLI tests yet\"",
+    "test": "node --test tests/*.test.js",
     "clean": "rm -rf dist"
   },
   "dependencies": {
