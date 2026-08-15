@@ -5,6 +5,7 @@ import path from "node:path";
 import process from "node:process";
 import { analyzeQuery, buildRepoIndex } from "@qra/core";
 import type { AnalyzeInput, AnalyzeReport } from "@qra/core";
+import { formatCompactCount, formatTokenCount, formatTokenRange } from "@qra/core";
 
 function getVersion(): string {
   try {
@@ -140,20 +141,20 @@ function printHumanReadable(report: AnalyzeReport): void {
   // eslint-disable-next-line no-console
   console.log(`  Reasons: ${formatReasons(report.risk.reasons)}`);
   // eslint-disable-next-line no-console
-  console.log(`Tokens: query ~${report.tokenEstimate.queryTokens}`);
+  console.log(`Tokens: query ~${formatTokenCount(report.tokenEstimate.queryTokens)}`);
   // eslint-disable-next-line no-console
   console.log(
-    `  files ~${report.tokenEstimate.fileTokensLow}-${report.tokenEstimate.fileTokensHigh}`
+    `  files ${formatTokenRange(report.tokenEstimate.fileTokensLow, report.tokenEstimate.fileTokensHigh)}`
   );
   // eslint-disable-next-line no-console
   console.log(
-    `  total ~${report.tokenEstimate.totalTokensLow}-${report.tokenEstimate.totalTokensHigh}`
+    `  total ${formatTokenRange(report.tokenEstimate.totalTokensLow, report.tokenEstimate.totalTokensHigh)}`
   );
   // eslint-disable-next-line no-console
   console.log(`Context risk: ${report.contextRisk.level.toUpperCase()}`);
   // eslint-disable-next-line no-console
   console.log(
-    `  limit ~${report.contextRisk.contextWindowTokens} tokens, headroom ~${report.contextRisk.headroomTokens}`
+    `  limit ~${formatCompactCount(report.contextRisk.contextWindowTokens)} tokens, headroom ~${formatCompactCount(report.contextRisk.headroomTokens)}`
   );
 
   // eslint-disable-next-line no-console
@@ -267,7 +268,7 @@ function printIndexSummary(): void {
   // eslint-disable-next-line no-console
   console.log(`Indexed files: ${fileCount}`);
   // eslint-disable-next-line no-console
-  console.log(`Approx tokens in indexed files: ~${totalTokens}`);
+  console.log(`Approx tokens in indexed files: ~${formatCompactCount(totalTokens)}`);
   // eslint-disable-next-line no-console
   console.log("");
 }

@@ -13,6 +13,28 @@ import type { QueryFeatureSummary } from "./queryFeatures";
 import { defaultConfig } from "./config";
 import { buildNextAction, buildRefinedPrompt } from "./rewrite";
 
+function trimTrailingZeroes(text: string): string {
+  return text.replace(/\.0$/, "");
+}
+
+export function formatCompactCount(value: number): string {
+  if (value >= 1_000_000) {
+    return `${trimTrailingZeroes((value / 1_000_000).toFixed(1))}M`;
+  }
+  if (value >= 1_000) {
+    return `${trimTrailingZeroes((value / 1_000).toFixed(1))}k`;
+  }
+  return `${value}`;
+}
+
+export function formatTokenCount(value: number): string {
+  return `${formatCompactCount(value)} tokens`;
+}
+
+export function formatTokenRange(low: number, high: number): string {
+  return `~${formatCompactCount(low)}–${formatCompactCount(high)} tokens`;
+}
+
 export function createDefaultOptions(
   overrides: Partial<QraAnalysisOptions> = {}
 ): QraAnalysisOptions {
@@ -65,11 +87,9 @@ export function buildSummary(
   const parts: string[] = [];
   parts.push(`Risk: ${risk.level.toUpperCase()} (${risk.overall}/100).`);
   parts.push(
-    `Estimated tokens: query ~${tokens.queryTokens}, files ~${tokens.fileTokensLow}–${tokens.fileTokensHigh}, total ~${tokens.totalTokensLow}–${tokens.totalTokensHigh}.`
+    `Estimated tokens: query ~${formatTokenCount(tokens.queryTokens)}, files ${formatTokenRange(tokens.fileTokensLow, tokens.fileTokensHigh)}, total ${formatTokenRange(tokens.totalTokensLow, tokens.totalTokensHigh)}.`
   );
-  parts.push(
-    `Context risk: ${context.level.toUpperCase()} against ~${context.contextWindowTokens} token window.`
-  );
+  parts.push(`Context risk: ${context.level.toUpperCase()} against ~${formatCompactCount(context.contextWindowTokens)} token window.`);
   parts.push(`Likely relevant files: ${topFileCount}.`);
   return parts.join(" ");
 }

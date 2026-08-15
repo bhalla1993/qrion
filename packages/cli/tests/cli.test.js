@@ -95,3 +95,9 @@ test("analyze human-readable output seeds repo docs in a fresh workspace", () =>
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test("analyze human-readable output uses compact token units", () => {
+  const output = runCli(["analyze", "Update the README formatting."]);
+
+  assert.match(output, /128k token window/i);
+});

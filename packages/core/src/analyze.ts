@@ -15,7 +15,7 @@ import { computeContextRisk, computeRiskScore } from "./riskScore";
 import { recommendModel } from "./modelAdvice";
 import { buildRewriteSuggestions } from "./rewrite";
 import { buildSplitSuggestions } from "./split";
-import { buildReport, createDefaultOptions } from "./utils";
+import { buildReport, createDefaultOptions, formatCompactCount } from "./utils";
 import { defaultConfig } from "./config";
 
 export interface AnalyzeQueryParams extends AnalyzeInput {}
@@ -100,7 +100,7 @@ export function analyzeQuery(params: AnalyzeQueryParams): AnalyzeReport {
   const budgetReasons =
     options.includeTokenEstimate && tokenBudget && tokens.totalTokensHigh > tokenBudget
       ? [
-          `Estimated tokens (~${tokens.totalTokensHigh}) exceed the configured per-query budget (~${tokenBudget}).`
+          `Estimated tokens (~${formatCompactCount(tokens.totalTokensHigh)}) exceed the configured per-query budget (~${formatCompactCount(tokenBudget)}).`
         ]
       : [];
 
