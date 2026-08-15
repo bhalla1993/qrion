@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#08111f" />
     <title>Qrion - Pre-query risk and scope analysis for AI coding prompts</title>
     <meta
       name="description"
@@ -12,6 +13,7 @@
       name="keywords"
       content="Qrion, prompt analysis, AI coding, risk analysis, scope analysis, token pressure, VS Code extension, CLI, developer tools"
     />
+    <meta name="robots" content="index,follow" />
     <meta property="og:type" content="website" />
     <meta
       property="og:title"
@@ -30,54 +32,121 @@
   <body>
     <a class="skip-link" href="#content">Skip to content</a>
 
-    <header class="hero">
-      <div class="shell">
-        <p class="eyebrow">Local-only developer tool</p>
-        <h1>Qrion helps developers judge an AI prompt before they send it.</h1>
-        <p class="lede">
-          Qrion is a deterministic pre-flight analyzer for AI coding workflows.
-          It estimates prompt risk, scope, token pressure, likely files, and
-          suggested prompt rewrites without calling any AI model.
-        </p>
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="./" aria-label="Qrion home">
+          <span class="brand-mark">Q</span>
+          <span class="brand-text">
+            <strong>Qrion</strong>
+            <small>Pre-query analysis for AI coding prompts</small>
+          </span>
+        </a>
 
-        <div class="hero-actions">
-          <a class="button primary" href="https://github.com/bhalla1993/qrion">
-            View the repo
-          </a>
-          <a class="button secondary" href="#what-it-does">See what it does</a>
-        </div>
-
-        <ul class="pill-row" aria-label="Key facts">
-          <li>Local only</li>
-          <li>No AI calls</li>
-          <li>Deterministic heuristics</li>
-          <li>CLI + VS Code</li>
-        </ul>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="#what-it-is">What it is</a>
+          <a href="#built-now">Built now</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#use-it">Use it</a>
+          <a href="#roadmap">Roadmap</a>
+        </nav>
       </div>
     </header>
 
     <main id="content">
-      <section class="section">
-        <div class="shell">
-          <h2>Why Qrion exists</h2>
-          <p>
-            AI coding tools are fast, but prompts can still be vague, broad, or
-            too expensive for a limited plan. Qrion is meant to sit in front of
-            those tools and give you a quick, explainable read on whether a
-            query is likely to stay small or turn into a repo-wide change.
-          </p>
-          <p>
-            It is not trying to predict an agent exactly. It is trying to help
-            you write a better prompt.
-          </p>
+      <section class="hero">
+        <div class="shell hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Local-only developer tool</p>
+            <h1>See the risk, scope, and token pressure before you send the prompt.</h1>
+            <p class="lede">
+              Qrion is a deterministic pre-flight analyzer for AI coding workflows.
+              It helps you spot broad prompts, probable file impact, and context
+              pressure before you spend tokens or trigger a large change.
+            </p>
+
+            <div class="hero-actions">
+              <a class="button primary" href="https://github.com/bhalla1993/qrion">
+                View the repo
+              </a>
+              <a class="button secondary" href="#built-now">Explore features</a>
+            </div>
+
+            <div class="status-row" aria-label="Key facts">
+              <span class="status-chip">Local only</span>
+              <span class="status-chip">No AI calls</span>
+              <span class="status-chip">Deterministic heuristics</span>
+              <span class="status-chip">CLI + VS Code</span>
+            </div>
+          </div>
+
+          <aside class="hero-panel" aria-label="Current release summary">
+            <p class="panel-kicker">Current release</p>
+            <h2>MVP1 is shipped</h2>
+            <p class="panel-copy">
+              The current release includes the shared analyzer core, CLI output,
+              VS Code shell, and regression tests.
+            </p>
+
+            <div class="metric-grid">
+              <article class="metric-card">
+                <span>Risk</span>
+                <strong>Low / Medium / High</strong>
+              </article>
+              <article class="metric-card">
+                <span>Files</span>
+                <strong>Ranked by signal</strong>
+              </article>
+              <article class="metric-card">
+                <span>Tokens</span>
+                <strong>Low / High range</strong>
+              </article>
+              <article class="metric-card">
+                <span>Advice</span>
+                <strong>Rewrite + split</strong>
+              </article>
+            </div>
+
+            <div class="snippet">
+              <div class="snippet-header">
+                <span>CLI example</span>
+                <span>Fast check</span>
+              </div>
+              <pre><code>npx qra analyze "Refactor auth module to use JWT instead of sessions."</code></pre>
+            </div>
+          </aside>
         </div>
       </section>
 
-      <section class="section alt" id="what-it-does">
+      <section class="section" id="what-it-is">
         <div class="shell">
-          <h2>What is built now</h2>
-          <div class="card-grid">
-            <article class="card">
+          <div class="section-heading">
+            <p class="section-label">Why it exists</p>
+            <h2>Qrion helps developers write safer prompts for AI coding tools.</h2>
+          </div>
+          <div class="copy-grid">
+            <p>
+              AI coding tools are fast, but prompts can still be vague, broad,
+              or too expensive for a limited plan. Qrion sits in front of those
+              tools and gives you a quick, explainable read on whether a query
+              is likely to stay small or turn into a repo-wide change.
+            </p>
+            <p>
+              It is not trying to predict an agent exactly. It is trying to help
+              you write a better prompt with a clearer sense of scope and cost.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt" id="built-now">
+        <div class="shell">
+          <div class="section-heading">
+            <p class="section-label">Built now</p>
+            <h2>What Qrion does today</h2>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <p class="card-badge">Shipped</p>
               <h3>Risk and scope</h3>
               <p>
                 Scores prompts from Low to High based on vague wording,
@@ -85,7 +154,8 @@
                 and context pressure.
               </p>
             </article>
-            <article class="card">
+            <article class="feature-card">
+              <p class="card-badge">Shipped</p>
               <h3>Likely files</h3>
               <p>
                 Indexes the workspace and ranks files using filename, folder,
@@ -93,14 +163,16 @@
                 change.
               </p>
             </article>
-            <article class="card">
+            <article class="feature-card">
+              <p class="card-badge">Shipped</p>
               <h3>Token estimate</h3>
               <p>
                 Produces a low/high token range for the query and relevant
                 files so you can spot context pressure early.
               </p>
             </article>
-            <article class="card">
+            <article class="feature-card">
+              <p class="card-badge">Shipped</p>
               <h3>Rewrite and split tips</h3>
               <p>
                 Gives deterministic advice for narrowing broad prompts or
@@ -111,10 +183,13 @@
         </div>
       </section>
 
-      <section class="section">
-        <div class="shell two-col">
+      <section class="section" id="how-it-works">
+        <div class="shell split-grid">
           <div>
-            <h2>How it works</h2>
+            <div class="section-heading">
+              <p class="section-label">How it works</p>
+              <h2>Static heuristics, clear reasons, no remote model calls.</h2>
+            </div>
             <ol class="steps">
               <li>Read the prompt and extract features such as vague, multi-step, and repo-wide language.</li>
               <li>Index the workspace and rank relevant files using lightweight heuristics.</li>
@@ -122,53 +197,68 @@
               <li>Return model advice, rewrite tips, split suggestions, and a concise summary.</li>
             </ol>
           </div>
-          <div class="callout">
-            <h3>Built to stay honest</h3>
+
+          <aside class="callout">
+            <p class="callout-label">Built to stay honest</p>
+            <h3>Qrion is intentionally approximate.</h3>
             <p>
-              Qrion is intentionally approximate. It does not simulate an
-              agent, does not call a remote model, and does not pretend to know
-              the exact files or tokens a coding assistant will use.
+              It does not simulate an agent, does not call a remote model, and
+              does not pretend to know the exact files or tokens a coding
+              assistant will use.
             </p>
-          </div>
+          </aside>
         </div>
       </section>
 
-      <section class="section alt">
+      <section class="section section-alt">
         <div class="shell">
-          <h2>Who it is for</h2>
-          <p>
+          <div class="section-heading">
+            <p class="section-label">Who it is for</p>
+            <h2>Helpful when prompts need to stay focused and affordable.</h2>
+          </div>
+          <p class="wide-copy">
             Qrion is useful for developers who use AI coding tools daily,
             especially when plan limits, token budgets, or large refactors make
             prompt quality matter more.
           </p>
-          <div class="tag-grid">
-            <span class="tag">Cursor</span>
-            <span class="tag">GitHub Copilot</span>
-            <span class="tag">Claude Code</span>
-            <span class="tag">Terminal agents</span>
-            <span class="tag">Prompt linting</span>
-            <span class="tag">Static analysis</span>
+          <div class="chip-row" aria-label="Target workflows">
+            <span class="chip">Cursor</span>
+            <span class="chip">GitHub Copilot</span>
+            <span class="chip">Claude Code</span>
+            <span class="chip">Terminal agents</span>
+            <span class="chip">Prompt linting</span>
+            <span class="chip">Static analysis</span>
           </div>
         </div>
       </section>
 
-      <section class="section">
+      <section class="section" id="use-it">
         <div class="shell">
-          <h2>Use it locally</h2>
-          <div class="card-grid">
-            <article class="card">
-              <h3>CLI</h3>
+          <div class="section-heading">
+            <p class="section-label">Use it locally</p>
+            <h2>CLI and VS Code workflows stay simple on purpose.</h2>
+          </div>
+          <div class="workflow-grid">
+            <article class="workflow-card">
+              <div class="workflow-card-head">
+                <h3>CLI</h3>
+                <span class="mini-label">Fast check</span>
+              </div>
               <pre><code>npx qra analyze "Refactor auth module to use JWT instead of sessions."
 npx qra analyze --json "Refactor the auth and billing flows."
 npx qra analyze --file prompt.txt</code></pre>
             </article>
-            <article class="card">
-              <h3>VS Code</h3>
+
+            <article class="workflow-card">
+              <div class="workflow-card-head">
+                <h3>VS Code</h3>
+                <span class="mini-label">Editor-first</span>
+              </div>
               <p>
                 Run the commands for selected text, clipboard text, or a manual
                 query and review the report in the Qrion sidebar panel.
               </p>
-              <p>
+              <p class="muted">
                 The extension uses the current workspace as its repo root.
               </p>
             </article>
@@ -176,28 +266,31 @@ npx qra analyze --file prompt.txt</code></pre>
         </div>
       </section>
 
-      <section class="section alt">
+      <section class="section section-alt" id="roadmap">
         <div class="shell">
-          <h2>Roadmap</h2>
-          <div class="roadmap">
-            <article class="roadmap-item">
-              <p class="status done">MVP1 complete</p>
+          <div class="section-heading">
+            <p class="section-label">Roadmap</p>
+            <h2>What is shipped now and what comes next.</h2>
+          </div>
+          <div class="timeline-grid">
+            <article class="timeline-card">
+              <p class="timeline-status done">MVP1 complete</p>
               <h3>Core analyzer, CLI, and VS Code shell</h3>
               <p>
                 The current release has the shared core heuristics, CLI output,
                 extension panel, and basic tests.
               </p>
             </article>
-            <article class="roadmap-item">
-              <p class="status">Coming next</p>
+            <article class="timeline-card">
+              <p class="timeline-status">Coming next</p>
               <h3>Better docs and release polish</h3>
               <p>
                 Improve discoverability, add examples, and make the release
                 process repeatable for future MVPs.
               </p>
             </article>
-            <article class="roadmap-item">
-              <p class="status">Later</p>
+            <article class="timeline-card">
+              <p class="timeline-status">Later</p>
               <h3>Deeper guardrails</h3>
               <p>
                 More refined heuristics, additional validation, and workflow
@@ -209,19 +302,26 @@ npx qra analyze --file prompt.txt</code></pre>
       </section>
 
       <section class="section">
-        <div class="shell two-col">
+        <div class="shell split-grid">
           <div>
-            <h2>Limitations</h2>
-            <ul class="bullets">
+            <div class="section-heading">
+              <p class="section-label">Limitations</p>
+              <h2>Honest by design, not pretending to be an oracle.</h2>
+            </div>
+            <ul class="bullet-list">
               <li>Heuristics are approximate by design.</li>
               <li>Qrion does not simulate any specific agent.</li>
               <li>It does not guarantee exact file or token usage.</li>
               <li>It is a planning aid, not an execution engine.</li>
             </ul>
           </div>
+
           <div>
-            <h2>Technical shape</h2>
-            <ul class="bullets">
+            <div class="section-heading">
+              <p class="section-label">Technical shape</p>
+              <h2>Small monorepo, clear package boundaries.</h2>
+            </div>
+            <ul class="bullet-list">
               <li><code>@qra/core</code> for deterministic analysis.</li>
               <li><code>@qra/cli</code> for terminal use.</li>
               <li><code>@qra/vscode</code> for editor workflows.</li>
@@ -233,14 +333,34 @@ npx qra analyze --file prompt.txt</code></pre>
     </main>
 
     <footer class="footer">
-      <div class="shell">
-        <p>
-          Qrion is a pre-query risk and scope analyzer for AI coding workflows.
-        </p>
-        <p>
-          Built for public GitHub discoverability and for developers who want
-          more control before they send a prompt.
-        </p>
+      <div class="shell footer-inner">
+        <div class="footer-brand">
+          <p class="footer-title">Qrion</p>
+          <p class="footer-copy">
+            A pre-query risk and scope analyzer for AI coding workflows.
+          </p>
+        </div>
+        <div class="footer-connect">
+          <p class="footer-title">Connect</p>
+          <p class="footer-copy">
+            Built by
+            <a href="https://bhalla1993.github.io/shivabhallaportfolio.github.io/">
+              Shiva Bhalla
+            </a>
+            and maintained as a public, local-first developer tool.
+          </p>
+          <div class="footer-links" aria-label="Contact links">
+            <a
+              class="footer-link"
+              href="https://bhalla1993.github.io/shivabhallaportfolio.github.io/"
+            >
+              Portfolio
+            </a>
+            <a class="footer-link" href="https://github.com/bhalla1993/qrion">
+              GitHub repo
+            </a>
+          </div>
+        </div>
       </div>
     </footer>
   </body>

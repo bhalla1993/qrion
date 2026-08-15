@@ -3,25 +3,62 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#08111f" />
     <title>Qrion - Page not found</title>
     <meta name="description" content="The requested Qrion docs page could not be found." />
     <meta http-equiv="refresh" content="5; url=/qrion/" />
+    <link rel="canonical" href="https://bhalla1993.github.io/qrion/" />
     <link rel="stylesheet" href="./assets/styles.css" />
   </head>
   <body>
-    <main class="section">
-      <div class="shell">
-        <p class="eyebrow">Qrion</p>
-        <h1>Page not found</h1>
-        <p class="lede">
-          The docs page you requested does not exist. You will be redirected to
-          the Qrion home page shortly.
-        </p>
-        <div class="hero-actions">
-          <a class="button primary" href="/qrion/">Go to Qrion docs</a>
-          <a class="button secondary" href="https://github.com/bhalla1993/qrion">Open the repo</a>
-        </div>
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="/qrion/" aria-label="Qrion home">
+          <span class="brand-mark">Q</span>
+          <span class="brand-text">
+            <strong>Qrion</strong>
+            <small>Pre-query analysis for AI coding prompts</small>
+          </span>
+        </a>
       </div>
+    </header>
+
+    <main id="content">
+      <section class="hero">
+        <div class="shell hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Qrion</p>
+            <h1>Page not found.</h1>
+            <p class="lede">
+              The docs page you requested does not exist. You will be redirected
+              back to the Qrion home page shortly.
+            </p>
+
+            <div class="hero-actions">
+              <a class="button primary" href="/qrion/">Go to Qrion docs</a>
+              <a class="button secondary" href="https://github.com/bhalla1993/qrion">
+                Open the repo
+              </a>
+            </div>
+          </div>
+
+          <aside class="hero-panel" aria-label="Quick fallback">
+            <p class="panel-kicker">Helpful fallback</p>
+            <h2>Back to the docs home</h2>
+            <p class="panel-copy">
+              The site is static, so the fastest path is to return to the main
+              landing page and continue from there.
+            </p>
+            <div class="snippet">
+              <div class="snippet-header">
+                <span>Tip</span>
+                <span>5 second redirect</span>
+              </div>
+              <pre><code>/qrion/</code></pre>
+            </div>
+          </aside>
+        </div>
+      </section>
     </main>
   </body>
 </html>
