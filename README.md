@@ -178,7 +178,7 @@ npm test
 Once you have built the repo (`npm run build`), you can run Qrion from the terminal.
 
 > **Naming note:** the product and repo are called **Qrion**, but the CLI binary is the shorter `qra` (the underlying **Q**uery **R**isk **A**nalyzer engine). Same tool, two names by design — `qra` for typing speed, "Qrion" for the brand.
-The default human-readable CLI output now stays concise and colorized in supported terminals: it leads with the verdict, intent, next action, refined prompt, and top files. Use `--verbose` when you want the full risk/token breakdown, `--color` to force colors, `--no-color` to disable them, and `--json` when you want the full structured report.
+The default human-readable CLI output now stays concise and colorized in supported terminals: it leads with the verdict, intent, why that intent was chosen, next action, refined prompt, and top files. Use `--verbose` when you want the full risk/token breakdown, `--color` to force colors, `--no-color` to disable them, and `--json` when you want the full structured report.
 
 ### Analyze a query string
 
@@ -307,6 +307,7 @@ Qrion uses the current workspace folder as the **workspace root** for indexing.
 After running any Qrion command, the **Qrion** view in the activity bar will show:
 
 - Intent tag for code-change, repo-survey, or out-of-scope prompts.
+- A short “why this label” explanation under the intent tag.
 - Next action.
 - A copyable refined prompt.
 - Risk level and score.

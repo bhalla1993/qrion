@@ -318,6 +318,8 @@ function printHumanReadable(report: AnalyzeReport, verbose = false): void {
   // eslint-disable-next-line no-console
   console.log(`${bold("Intent:")} ${colorIntent(report.queryFeatures.intent)}`);
   // eslint-disable-next-line no-console
+  console.log(`  ${dim("Why:")} ${report.queryFeatures.intentReasons.join(" | ")}`);
+  // eslint-disable-next-line no-console
   console.log("");
 
   // eslint-disable-next-line no-console

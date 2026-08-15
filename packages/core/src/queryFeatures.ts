@@ -9,11 +9,15 @@ export interface QueryFeatureSummary {
   isVeryShort: boolean;
   isVeryLong: boolean;
   intent: PromptIntent;
+  intentReasons: string[];
   vagueSignals: string[];
   multiStepSignals: string[];
   multiModuleSignals: string[];
   sensitiveSignals: string[];
   repoWideSignals: string[];
+  codeActionSignals: string[];
+  codeShapeSignals: string[];
+  repoSurveySignals: string[];
   outOfScopeSignals: string[];
 }
 
@@ -95,6 +99,30 @@ const REPO_WIDE_PATTERNS = [
   "across the codebase"
 ];
 
+const CODE_ACTION_PATTERNS = [
+  "fix",
+  "update",
+  "add",
+  "implement",
+  "refactor",
+  "debug",
+  "rename",
+  "remove",
+  "replace",
+  "improve",
+  "clean up",
+  "optimize",
+  "migrate",
+  "test",
+  "create",
+  "patch",
+  "adjust",
+  "convert",
+  "split",
+  "merge",
+  "document"
+];
+
 const REPO_SURVEY_PATTERNS = [
   "what is this repo",
   "what is the purpose",
@@ -105,25 +133,46 @@ const REPO_SURVEY_PATTERNS = [
   "what is left",
   "repo overview",
   "read through the repo",
-  "tell me the purpose",
+  "walk me through this repo",
+  "repo tour",
   "summarize the repo",
+  "summarize this repo",
   "implemented so far",
-  "what do i have here"
+  "what do i have here",
+  "what should i read first",
+  "what should i look at",
+  "where is",
+  "how does this repo work",
+  "architecture"
 ];
 
-const OUT_OF_SCOPE_PATTERNS = [
-  /\bhi\b/i,
-  /\bhello\b/i,
-  /\bhey\b/i,
-  /\bhow are you\b/i,
-  /\bwhat'?s up\b/i,
-  /\bgood morning\b/i,
-  /\bgood afternoon\b/i,
-  /\bgood evening\b/i,
-  /\bwho are you\b/i,
-  /\bthank you\b/i,
-  /\bthanks\b/i,
-  /\btell me a joke\b/i
+type RegexSignalPattern = {
+  pattern: RegExp;
+  label: string;
+};
+
+const CODE_SHAPE_PATTERNS: RegexSignalPattern[] = [
+  { pattern: /```[\s\S]*?```/, label: "code block" },
+  { pattern: /\b[A-Za-z0-9_./-]+\.(ts|tsx|js|jsx|md|json|yml|yaml|py|go|rs)\b/i, label: "file name" },
+  { pattern: /\b(src|lib|app|components|pages|packages)\//i, label: "path" },
+  { pattern: /\bError:\b|\bTypeError:\b|\bReferenceError:\b|\bSyntaxError:\b/i, label: "error text" },
+  { pattern: /^\s+at\s+/m, label: "stack trace" }
+];
+
+const OUT_OF_SCOPE_PATTERNS: RegexSignalPattern[] = [
+  { pattern: /\bhi\b/i, label: "hi" },
+  { pattern: /\bhello\b/i, label: "hello" },
+  { pattern: /\bhey\b/i, label: "hey" },
+  { pattern: /\bhow are you\b/i, label: "how are you" },
+  { pattern: /\bhow's it going\b/i, label: "how's it going" },
+  { pattern: /\bwhat'?s up\b/i, label: "what's up" },
+  { pattern: /\bgood morning\b/i, label: "good morning" },
+  { pattern: /\bgood afternoon\b/i, label: "good afternoon" },
+  { pattern: /\bgood evening\b/i, label: "good evening" },
+  { pattern: /\bwho are you\b/i, label: "who are you" },
+  { pattern: /\bthank you\b/i, label: "thank you" },
+  { pattern: /\bthanks\b/i, label: "thanks" },
+  { pattern: /\btell me a joke\b/i, label: "tell me a joke" }
 ];
 
 function collectMatches(textLower: string, patterns: string[]): string[] {
@@ -136,14 +185,78 @@ function collectMatches(textLower: string, patterns: string[]): string[] {
   return hits;
 }
 
-function collectRegexMatches(text: string, patterns: RegExp[]): string[] {
+function collectRegexMatches(text: string, patterns: RegexSignalPattern[]): string[] {
   const hits: string[] = [];
-  for (const pattern of patterns) {
+  for (const { pattern, label } of patterns) {
     if (pattern.test(text)) {
-      hits.push(pattern.source.replace(/\\b/g, "").replace(/\\/g, ""));
+      hits.push(label);
     }
   }
   return hits;
+}
+
+function uniqueSignals(signals: string[]): string[] {
+  return Array.from(new Set(signals));
+}
+
+function formatSignalList(signals: string[], fallback: string): string {
+  if (signals.length === 0) {
+    return fallback;
+  }
+  if (signals.length === 1) {
+    return signals[0];
+  }
+  if (signals.length === 2) {
+    return `${signals[0]} and ${signals[1]}`;
+  }
+  return `${signals.slice(0, 2).join(", ")}, and more`;
+}
+
+function buildIntentReasons(params: {
+  intent: PromptIntent;
+  codeActionSignals: string[];
+  codeShapeSignals: string[];
+  repoSurveySignals: string[];
+  outOfScopeSignals: string[];
+  repoWideSignals: string[];
+  vagueSignals: string[];
+  multiModuleSignals: string[];
+  sensitiveSignals: string[];
+}): string[] {
+  const {
+    intent,
+    codeActionSignals,
+    codeShapeSignals,
+    repoSurveySignals,
+    outOfScopeSignals,
+    repoWideSignals,
+    vagueSignals,
+    multiModuleSignals,
+    sensitiveSignals
+  } = params;
+
+  if (intent === "repo-survey") {
+    const signals = uniqueSignals([...repoSurveySignals, ...repoWideSignals]);
+    return [`Matched repo-overview cues: ${formatSignalList(signals, "repo-overview language")}`];
+  }
+
+  if (intent === "out-of-scope") {
+    return [`Matched conversational cues: ${formatSignalList(outOfScopeSignals, "small talk or general chat")}`];
+  }
+
+  const cues = uniqueSignals([
+    ...codeActionSignals.slice(0, 3),
+    ...codeShapeSignals.slice(0, 3),
+    ...vagueSignals.slice(0, 2),
+    ...multiModuleSignals.slice(0, 2),
+    ...sensitiveSignals.slice(0, 2)
+  ]);
+
+  if (cues.length > 0) {
+    return [`Matched code-change cues: ${formatSignalList(cues, "change-oriented language")}`];
+  }
+
+  return ["No repo-overview or conversational cues matched; defaulted to code-change."];
 }
 
 export function extractQueryFeatures(input: QraQueryInput): QueryFeatureSummary {
@@ -159,16 +272,44 @@ export function extractQueryFeatures(input: QraQueryInput): QueryFeatureSummary 
   const multiModuleSignals = collectMatches(textLower, MULTI_MODULE_TOKENS);
   const sensitiveSignals = collectMatches(textLower, SENSITIVE_TOKENS);
   const repoWideSignals = collectMatches(textLower, REPO_WIDE_PATTERNS);
+  const codeActionSignals = collectMatches(textLower, CODE_ACTION_PATTERNS);
   const repoSurveySignals = collectMatches(textLower, REPO_SURVEY_PATTERNS);
-  const outOfScopeSignals = collectRegexMatches(textLower, OUT_OF_SCOPE_PATTERNS);
+  const codeShapeSignals = collectRegexMatches(text, CODE_SHAPE_PATTERNS);
+  const outOfScopeSignals = collectRegexMatches(text, OUT_OF_SCOPE_PATTERNS);
 
   const isVeryShort = wordCount < 5;
   const isVeryLong = wordCount > 400;
-  const intent: PromptIntent = repoSurveySignals.length > 0
-    ? "repo-survey"
-    : outOfScopeSignals.length > 0
-      ? "out-of-scope"
-      : "code-change";
+
+  const codeScore =
+    codeActionSignals.length * 2 +
+    codeShapeSignals.length * 3 +
+    vagueSignals.length +
+    multiStepSignals.length +
+    multiModuleSignals.length +
+    sensitiveSignals.length +
+    repoWideSignals.length;
+
+  const repoSurveyScore = repoSurveySignals.length * 4 + (repoWideSignals.length > 0 ? 1 : 0);
+  const outOfScopeScore = outOfScopeSignals.length * 4;
+
+  const intent: PromptIntent =
+    repoSurveyScore > 0 && repoSurveyScore >= codeScore && repoSurveyScore >= outOfScopeScore
+      ? "repo-survey"
+      : outOfScopeScore > 0 && codeScore === 0 && repoSurveyScore === 0
+        ? "out-of-scope"
+        : "code-change";
+
+  const intentReasons = buildIntentReasons({
+    intent,
+    codeActionSignals,
+    codeShapeSignals,
+    repoSurveySignals,
+    outOfScopeSignals,
+    repoWideSignals,
+    vagueSignals,
+    multiModuleSignals,
+    sensitiveSignals
+  });
 
   return {
     length,
@@ -177,12 +318,15 @@ export function extractQueryFeatures(input: QraQueryInput): QueryFeatureSummary 
     isVeryShort,
     isVeryLong,
     intent,
+    intentReasons,
     vagueSignals,
     multiStepSignals,
     multiModuleSignals,
     sensitiveSignals,
     repoWideSignals,
+    codeActionSignals,
+    codeShapeSignals,
+    repoSurveySignals,
     outOfScopeSignals
   };
 }
-

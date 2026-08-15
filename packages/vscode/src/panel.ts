@@ -149,6 +149,10 @@ export class QraPanelProvider implements WebviewViewProvider {
       .tag-intent-code-change { background: #0984e333; color: #0984e3; }
       .tag-intent-repo-survey { background: #7b1fa233; color: #7b1fa2; }
       .tag-intent-out-of-scope { background: #5f6b7a33; color: #5f6b7a; }
+      .intent-reason {
+        color: var(--vscode-descriptionForeground);
+        font-size: 0.9rem;
+      }
       .next-action {
         font-weight: 600;
       }
@@ -278,6 +282,9 @@ export class QraPanelProvider implements WebviewViewProvider {
 
       "<h2>Intent</h2>",
       `<p><span class="${intentClass}">${escapeHtml(r.queryFeatures.intent.toUpperCase())}</span></p>`,
+      `<p class="intent-reason">Why: ${escapeHtml(
+        r.queryFeatures.intentReasons.join(" | ")
+      )}</p>`,
 
       outOfScopeMessage,
 

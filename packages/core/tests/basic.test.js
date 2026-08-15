@@ -102,6 +102,32 @@ test("general chat prompt is marked out of scope", () => {
   assert.deepStrictEqual(report.splits, []);
 });
 
+test("mixed chat and code cues stay code-change", () => {
+  const report = analyzeQuery({
+    query: {
+      source: "manual",
+      text: "Thanks, can you fix the auth bug in src/auth/login.ts?",
+      cwd: process.cwd()
+    }
+  });
+
+  assert.strictEqual(report.queryFeatures.intent, "code-change");
+  assert.match(report.queryFeatures.intentReasons.join(" "), /code-change cues/i);
+});
+
+test("pasted code-shaped content is treated as code-change", () => {
+  const report = analyzeQuery({
+    query: {
+      source: "manual",
+      text: "```ts\nconst token = 'abc';\nfunction parse() { return token; }\n```",
+      cwd: process.cwd()
+    }
+  });
+
+  assert.strictEqual(report.queryFeatures.intent, "code-change");
+  assert.match(report.queryFeatures.intentReasons.join(" "), /code-change cues/i);
+});
+
 test("repo-survey prompt seeds the repo map in a fresh workspace", () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "qra-survey-test-"));
 

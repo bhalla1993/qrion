@@ -54,6 +54,7 @@ test("analyze human-readable output highlights the action and prompt", () => {
 
   assert.match(output, /Verdict:/);
   assert.match(output, /Intent:/);
+  assert.match(output, /Why:/);
   assert.match(output, /Next action:/);
   assert.match(output, /Refined prompt:/);
   assert.match(output, /Top files:/);
@@ -78,6 +79,7 @@ test("analyze human-readable output adapts for repo-survey prompts", () => {
   assert.match(output, /repository understanding task/i);
   assert.match(output, /purpose of the repo/i);
   assert.match(output, /remaining gaps/i);
+  assert.match(output, /Why:/);
 });
 
 test("analyze human-readable output shows out-of-scope guidance", () => {
@@ -86,6 +88,7 @@ test("analyze human-readable output shows out-of-scope guidance", () => {
   assert.match(output, /Intent:/);
   assert.match(output, /out-of-scope/i);
   assert.match(output, /outside Qrion's scope/i);
+  assert.match(output, /Why:/);
 });
 
 test("analyze human-readable output seeds repo docs in a fresh workspace", () => {
