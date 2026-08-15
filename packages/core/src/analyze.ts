@@ -55,7 +55,8 @@ export function analyzeQuery(params: AnalyzeQueryParams): AnalyzeReport {
   const relevantFiles = options.includeFileRanking
     ? rankFiles(input.text, {
         repoFiles: indexResult.files,
-        maxResults: defaultConfig.maxFilesPerQuery
+        maxResults: defaultConfig.maxFilesPerQuery,
+        intent: features.intent
       })
     : [];
 
@@ -75,10 +76,12 @@ export function analyzeQuery(params: AnalyzeQueryParams): AnalyzeReport {
     : NEUTRAL_RISK_SCORE;
 
   const modelAdvice = recommendModel(risk);
-  const rewrites = options.includeSuggestions
+  const shouldShowSuggestions =
+    options.includeSuggestions && features.intent === "code-change";
+  const rewrites = shouldShowSuggestions
     ? buildRewriteSuggestions(features)
     : [];
-  const splits = options.includeSuggestions
+  const splits = shouldShowSuggestions
     ? buildSplitSuggestions(features)
     : [];
 

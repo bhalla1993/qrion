@@ -22,7 +22,15 @@ const DEFAULT_EXCLUDE_DIRS = [
   "out",
   ".next",
   ".turbo",
-  ".vercel"
+  ".vercel",
+  ".pytest_cache",
+  ".mypy_cache",
+  ".ruff_cache",
+  ".tox",
+  ".nox",
+  ".venv",
+  "venv",
+  "__pycache__"
 ];
 
 const DEFAULT_INCLUDE_EXTENSIONS = [
@@ -32,7 +40,11 @@ const DEFAULT_INCLUDE_EXTENSIONS = [
   ".jsx",
   ".json",
   ".md",
-  ".mdx"
+  ".mdx",
+  ".html",
+  ".css",
+  ".yml",
+  ".yaml"
 ];
 
 const APPROX_CHARS_PER_TOKEN = 4;

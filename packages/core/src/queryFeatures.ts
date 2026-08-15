@@ -1,11 +1,14 @@
 import type { QraQueryInput } from "./types";
 
+export type PromptIntent = "code-change" | "repo-survey";
+
 export interface QueryFeatureSummary {
   length: number;
   lineCount: number;
   wordCount: number;
   isVeryShort: boolean;
   isVeryLong: boolean;
+  intent: PromptIntent;
   vagueSignals: string[];
   multiStepSignals: string[];
   multiModuleSignals: string[];
@@ -91,6 +94,22 @@ const REPO_WIDE_PATTERNS = [
   "across the codebase"
 ];
 
+const REPO_SURVEY_PATTERNS = [
+  "what is this repo",
+  "what is the purpose",
+  "what's the purpose",
+  "what has been implemented",
+  "what is implemented",
+  "what remains",
+  "what is left",
+  "repo overview",
+  "read through the repo",
+  "tell me the purpose",
+  "summarize the repo",
+  "implemented so far",
+  "what do i have here"
+];
+
 function collectMatches(textLower: string, patterns: string[]): string[] {
   const hits: string[] = [];
   for (const pattern of patterns) {
@@ -114,9 +133,11 @@ export function extractQueryFeatures(input: QraQueryInput): QueryFeatureSummary 
   const multiModuleSignals = collectMatches(textLower, MULTI_MODULE_TOKENS);
   const sensitiveSignals = collectMatches(textLower, SENSITIVE_TOKENS);
   const repoWideSignals = collectMatches(textLower, REPO_WIDE_PATTERNS);
+  const repoSurveySignals = collectMatches(textLower, REPO_SURVEY_PATTERNS);
 
   const isVeryShort = wordCount < 5;
   const isVeryLong = wordCount > 400;
+  const intent: PromptIntent = repoSurveySignals.length > 0 ? "repo-survey" : "code-change";
 
   return {
     length,
@@ -124,6 +145,7 @@ export function extractQueryFeatures(input: QraQueryInput): QueryFeatureSummary 
     wordCount,
     isVeryShort,
     isVeryLong,
+    intent,
     vagueSignals,
     multiStepSignals,
     multiModuleSignals,

@@ -68,6 +68,66 @@ test("short, narrow, unambiguous query stays LOW risk", () => {
   assert.match(report.refinedPrompt, /Keep the change focused/);
 });
 
+test("repo-survey prompt gets repo-understanding guidance", () => {
+  const report = analyzeQuery({
+    query: {
+      source: "manual",
+      text: "Read through the repo and tell me the purpose of the repo and what has been implemented so far and what left",
+      cwd: process.cwd()
+    }
+  });
+
+  assert.strictEqual(report.queryFeatures.intent, "repo-survey");
+  assert.match(report.nextAction, /repository understanding task/i);
+  assert.match(report.refinedPrompt, /inspect this repository and summarize/i);
+  assert.match(report.refinedPrompt, /purpose of the repo/i);
+  assert.match(report.refinedPrompt, /remaining gaps/i);
+  assert.deepStrictEqual(report.rewrites, []);
+  assert.deepStrictEqual(report.splits, []);
+});
+
+test("repo-survey prompt seeds the repo map in a fresh workspace", () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "qra-survey-test-"));
+
+  try {
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "survey-test", private: true }, null, 2)
+    );
+    fs.writeFileSync(path.join(tmpDir, "README.md"), "# Survey test");
+    fs.writeFileSync(path.join(tmpDir, "MVP1.md"), "MVP1 checklist");
+    fs.mkdirSync(path.join(tmpDir, "packages", "core", "src"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, "packages", "core", "src", "index.ts"),
+      "export const core = true;"
+    );
+    fs.mkdirSync(path.join(tmpDir, "docs"), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, "docs", "index.html"), "<!doctype html>");
+
+    const report = analyzeQuery({
+      query: {
+        source: "manual",
+        text: "Read through the repo and tell me the purpose of the repo and what has been implemented so far and what left",
+        cwd: tmpDir
+      }
+    });
+
+    const paths = report.relevantFiles.map((file) => file.path);
+
+    assert.ok(paths.includes("README.md"), "expected README.md to be surfaced");
+    assert.ok(paths.includes("package.json"), "expected package.json to be surfaced");
+    assert.ok(paths.includes("MVP1.md"), "expected MVP1.md to be surfaced");
+    assert.ok(
+      paths.includes(path.join("packages", "core", "src", "index.ts")),
+      "expected core package entry point to be surfaced"
+    );
+    assert.ok(paths.includes(path.join("docs", "index.html")), "expected docs index to be surfaced");
+    assert.match(report.summary, /Likely relevant files: [1-9]/);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 test("short, specific query has bounded token estimate", () => {
   const report = analyzeQuery({
     query: {
@@ -169,6 +229,27 @@ test(".qraignore excludes matching directories and file extensions from the repo
     assert.ok(
       !paths.includes("types.gen.ts"),
       "expected .qraignore extension-style rule to exclude matching files"
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test("repo index ignores common tool cache directories", () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "qra-cache-test-"));
+
+  try {
+    fs.mkdirSync(path.join(tmpDir, ".pytest_cache"), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, ".pytest_cache", "README.md"), "# Cache noise");
+    fs.writeFileSync(path.join(tmpDir, "README.md"), "# Real repo README");
+
+    const { files } = buildRepoIndex({ cwd: tmpDir });
+    const paths = files.map((f) => f.path);
+
+    assert.ok(paths.includes("README.md"), "expected the real README to be indexed");
+    assert.ok(
+      !paths.some((p) => p.startsWith(".pytest_cache")),
+      "expected pytest cache files to be ignored"
     );
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });

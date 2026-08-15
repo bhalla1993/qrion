@@ -53,3 +53,45 @@ test("analyze human-readable output highlights the action and prompt", () => {
   assert.match(output, /Refined prompt:/);
   assert.match(output, /Task:/);
 });
+
+test("analyze human-readable output adapts for repo-survey prompts", () => {
+  const output = runCli([
+    "analyze",
+    "Read through the repo and tell me the purpose of the repo and what has been implemented so far and what left"
+  ]);
+
+  assert.match(output, /repository understanding task/i);
+  assert.match(output, /purpose of the repo/i);
+  assert.match(output, /remaining gaps/i);
+});
+
+test("analyze human-readable output seeds repo docs in a fresh workspace", () => {
+  const tmpDir = fs.mkdtempSync(path.join(require("node:os").tmpdir(), "qra-cli-survey-"));
+
+  try {
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ name: "survey-cli-test", private: true }, null, 2)
+    );
+    fs.writeFileSync(path.join(tmpDir, "README.md"), "# Survey CLI test");
+    fs.mkdirSync(path.join(tmpDir, "packages", "cli", "src"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, "packages", "cli", "src", "cli.ts"),
+      "export const cli = true;"
+    );
+
+    const output = runCli(
+      [
+        "analyze",
+        "Read through the repo and tell me the purpose of the repo and what has been implemented so far and what left"
+      ],
+      { cwd: tmpDir }
+    );
+
+    assert.match(output, /README\.md/);
+    assert.match(output, /package\.json/);
+    assert.match(output, /package entry point/i);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});

@@ -25,6 +25,10 @@ function buildDirectiveList(
   features: QueryFeatureSummary,
   riskLevel: RiskLevel
 ): string[] {
+  if (features.intent === "repo-survey") {
+    return [];
+  }
+
   const directives: string[] = [];
 
   if (
@@ -67,6 +71,10 @@ function buildDirectiveList(
 export function buildRewriteSuggestions(
   features: QueryFeatureSummary
 ): RewriteSuggestion[] {
+  if (features.intent === "repo-survey") {
+    return [];
+  }
+
   const suggestions: RewriteSuggestion[] = [];
 
   if (features.vagueSignals.length > 0 || features.isVeryShort) {
@@ -121,6 +129,10 @@ export function buildNextAction(
   features: QueryFeatureSummary,
   riskLevel: RiskLevel
 ): string {
+  if (features.intent === "repo-survey") {
+    return "Treat this as a repository understanding task: summarize the repo purpose, what has been implemented, and what remains, citing the most relevant files.";
+  }
+
   const directives = buildDirectiveList(features, riskLevel);
 
   if (directives.length === 0) {
@@ -141,6 +153,28 @@ export function buildRefinedPrompt(
   riskLevel: RiskLevel
 ): string {
   const task = originalText.trim().replace(/\s+/g, " ");
+
+  if (features.intent === "repo-survey") {
+    return [
+      "Please inspect this repository and summarize:",
+      "",
+      "Task:",
+      task,
+      "",
+      "Guidance:",
+      "- Explain the purpose of the repo.",
+      "- List what appears to be implemented so far.",
+      "- Identify what still looks incomplete or left to do.",
+      "- Cite the most relevant files or folders that support your answer.",
+      "",
+      "Return:",
+      "- a short repo summary",
+      "- the implemented areas",
+      "- the remaining gaps",
+      "- any important files to read next"
+    ].join("\n");
+  }
+
   const directives = buildDirectiveList(features, riskLevel);
 
   const guidance =
