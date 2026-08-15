@@ -1,4 +1,5 @@
-import type { ContextRisk, QueryFeatureSummary, RiskLevel, RiskScore } from "./types";
+import type { ContextRisk, RiskLevel, RiskScore } from "./types";
+import type { QueryFeatureSummary } from "./queryFeatures";
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));

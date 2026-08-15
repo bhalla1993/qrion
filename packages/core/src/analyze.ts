@@ -52,7 +52,8 @@ export function analyzeQuery(params: AnalyzeQueryParams): AnalyzeReport {
     relevantFiles,
     tokens,
     context,
-    risk
+    risk,
+    features
   });
 
   return {

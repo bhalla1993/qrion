@@ -1,4 +1,5 @@
-import type { QueryFeatureSummary, SplitSuggestion } from "./types";
+import type { SplitSuggestion } from "./types";
+import type { QueryFeatureSummary } from "./queryFeatures";
 
 export function buildSplitSuggestions(
   features: QueryFeatureSummary

@@ -1,7 +1,7 @@
 {
   "name": "@qra/vscode",
-  "displayName": "QRA: Query Risk & Scope Analyzer",
-  "description": "VS Code integration for Query Risk & Scope Analyzer (QRA).",
+  "displayName": "Qrion",
+  "description": "Local-first Query Risk & Scope Analyzer for AI coding prompts.",
   "version": "0.0.0",
   "publisher": "qra-tools",
   "engines": {
@@ -11,33 +11,27 @@
     "Other"
   ],
   "main": "./dist/extension.js",
-  "activationEvents": [
-    "onCommand:qra.analyzeSelection",
-    "onCommand:qra.analyzeClipboard",
-    "onCommand:qra.analyzeManual",
-    "onView:qra.panel"
-  ],
   "contributes": {
     "commands": [
       {
         "command": "qra.analyzeSelection",
-        "title": "QRA: Analyze Selected Text"
+        "title": "Qrion: Analyze Selected Text"
       },
       {
         "command": "qra.analyzeClipboard",
-        "title": "QRA: Analyze Clipboard Text"
+        "title": "Qrion: Analyze Clipboard Text"
       },
       {
         "command": "qra.analyzeManual",
-        "title": "QRA: Analyze Query..."
+        "title": "Qrion: Analyze Custom Query"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
           "id": "qra",
-          "title": "QRA",
-          "icon": ""
+          "title": "Qrion",
+          "icon": "media/icon.svg"
         }
       ]
     },
@@ -45,7 +39,7 @@
       "qra": [
         {
           "id": "qra.panel",
-          "name": "QRA Panel"
+          "name": "Qrion Panel"
         }
       ]
     },

@@ -1,4 +1,5 @@
-import type { QueryFeatureSummary, RewriteSuggestion } from "./types";
+import type { RewriteSuggestion } from "./types";
+import type { QueryFeatureSummary } from "./queryFeatures";
 
 export function buildRewriteSuggestions(
   features: QueryFeatureSummary

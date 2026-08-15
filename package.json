@@ -8,7 +8,10 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "npm run build:core && npm run build:cli && npm run build:vscode",
+    "build:core": "npm run build --workspace @qra/core",
+    "build:cli": "npm run build --workspace @qra/cli",
+    "build:vscode": "npm run build --workspace @qra/vscode",
     "test": "npm test --workspaces",
     "clean": "npm run clean --workspaces || true"
   },

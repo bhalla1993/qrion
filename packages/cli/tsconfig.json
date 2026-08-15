@@ -2,8 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist",
-    "preserveShebang": true
+    "outDir": "dist"
   },
   "include": [
     "src"

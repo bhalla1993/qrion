@@ -9,6 +9,8 @@ import type {
   RiskScore,
   TokenEstimate
 } from "./types";
+import type { QueryFeatureSummary } from "./queryFeatures";
+import { defaultConfig } from "./config";
 
 export function createDefaultOptions(
   overrides: Partial<QraAnalysisOptions> = {}
@@ -79,6 +81,7 @@ export function buildReport(params: {
   tokens: TokenEstimate;
   context: ContextRisk;
   risk: RiskScore;
+  features: QueryFeatureSummary;
 }): AnalyzeReport {
   const confidence = inferConfidence(
     params.input.text.trim().split(/\s+/).filter(Boolean).length,
@@ -93,9 +96,21 @@ export function buildReport(params: {
     params.relevantFiles.length
   );
 
+  const contextLimit =
+    params.options.contextWindowTokens ?? params.context.contextWindowTokens;
+
+  const reasons = [
+    ...params.risk.reasons,
+    ...confidence.reasons
+  ];
+
   return {
     input: params.input,
     options: params.options,
+    workspaceRoot: params.input.cwd,
+    contextLimit,
+    config: defaultConfig,
+    queryFeatures: params.features,
     index: params.index,
     relevantFiles: params.relevantFiles,
     tokenEstimate: params.tokens,
@@ -105,6 +120,7 @@ export function buildReport(params: {
     rewrites: [],
     splits: [],
     confidence,
+    reasons,
     summary
   };
 }
