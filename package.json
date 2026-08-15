@@ -1,0 +1,22 @@
+{
+  "name": "qra",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Query Risk & Scope Analyzer (QRA) monorepo scaffold.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm test --workspaces",
+    "clean": "npm run clean --workspaces || true"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

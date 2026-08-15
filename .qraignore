@@ -1,0 +1,14 @@
+node_modules
+dist
+lib
+out
+coverage
+.git
+.hg
+.svn
+.DS_Store
+.vscode
+.idea
+*.log
+*.tsbuildinfo
+

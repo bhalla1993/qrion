@@ -1,0 +1,19 @@
+{
+  "name": "@qra/core",
+  "version": "0.0.0",
+  "description": "Core analysis library for Query Risk & Scope Analyzer (QRA).",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "echo \"No core tests yet\"",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "qra",
+    "analysis",
+    "developer-tools"
+  ],
+  "author": "",
+  "license": "MIT"
+}

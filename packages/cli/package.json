@@ -1,0 +1,23 @@
+{
+  "name": "@qra/cli",
+  "version": "0.0.0",
+  "description": "CLI for Query Risk & Scope Analyzer (QRA).",
+  "bin": {
+    "qra": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "echo \"No CLI tests yet\"",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@qra/core": "0.0.0"
+  },
+  "keywords": [
+    "qra",
+    "cli",
+    "developer-tools"
+  ],
+  "author": "",
+  "license": "MIT"
+}

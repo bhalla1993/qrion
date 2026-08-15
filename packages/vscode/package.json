@@ -1,0 +1,75 @@
+{
+  "name": "@qra/vscode",
+  "displayName": "QRA: Query Risk & Scope Analyzer",
+  "description": "VS Code integration for Query Risk & Scope Analyzer (QRA).",
+  "version": "0.0.0",
+  "publisher": "qra-tools",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onCommand:qra.analyzeSelection",
+    "onCommand:qra.analyzeClipboard",
+    "onCommand:qra.analyzeManual",
+    "onView:qra.panel"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "qra.analyzeSelection",
+        "title": "QRA: Analyze Selected Text"
+      },
+      {
+        "command": "qra.analyzeClipboard",
+        "title": "QRA: Analyze Clipboard Text"
+      },
+      {
+        "command": "qra.analyzeManual",
+        "title": "QRA: Analyze Query..."
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "qra",
+          "title": "QRA",
+          "icon": ""
+        }
+      ]
+    },
+    "views": {
+      "qra": [
+        {
+          "id": "qra.panel",
+          "name": "QRA Panel"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "QRA",
+      "properties": {
+        "qra.enableExperimentalFeatures": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable experimental QRA features (no effect yet)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "echo \"No VS Code extension tests yet\"",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@qra/core": "0.0.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.90.0"
+  },
+  "license": "MIT"
+}
